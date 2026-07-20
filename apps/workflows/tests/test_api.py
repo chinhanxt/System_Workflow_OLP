@@ -228,3 +228,119 @@ class TestWorkflowAPI:
         response = self.client.post(submit_url, {}, format="json")
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.data["detail"] == "Workflow is inactive."
+
+    def test_document_chunks_create_with_api_key_test_mock(self):
+        """Verify document chunk creation with 'test' or 'mock-key' headers saves mock embedding."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse("api:documentchunk-list")
+        
+        # Test with "test" key
+        self.client.credentials(HTTP_X_GEMINI_API_KEY="test")
+        data = {"document_name": "Test Doc 1", "text_content": "Hello world 1"}
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        chunk = DocumentChunk.objects.get(id=response.data["id"])
+        assert chunk.embedding == [0.1] * 768
+
+        # Test with "mock-key" key
+        self.client.credentials(HTTP_X_GEMINI_API_KEY="mock-key")
+        data = {"document_name": "Test Doc 2", "text_content": "Hello world 2"}
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        chunk = DocumentChunk.objects.get(id=response.data["id"])
+        assert chunk.embedding == [0.1] * 768
+
+    def test_document_chunks_create_with_api_key_live_mocked(self):
+        """Verify live embedding request extracts and saves the correct embedding values."""
+        from unittest.mock import patch
+        self.client.force_authenticate(user=self.user)
+        url = reverse("api:documentchunk-list")
+        self.client.credentials(HTTP_X_GEMINI_API_KEY="actual-gemini-key")
+        
+        data = {"document_name": "Live Doc", "text_content": "Compute this embedding"}
+        mock_embedding_values = [0.5] * 768
+
+        with patch("requests.post") as mock_post:
+            mock_response = mock_post.return_value
+            mock_response.raise_for_status.return_value = None
+            mock_response.json.return_value = {
+                "embedding": {
+                    "values": mock_embedding_values
+                }
+            }
+            response = self.client.post(url, data, format="json")
+            assert response.status_code == status.HTTP_201_CREATED
+            
+            mock_post.assert_called_once()
+            args, kwargs = mock_post.call_args
+            assert "actual-gemini-key" in args[0]
+            assert kwargs["json"]["content"]["parts"][0]["text"] == "Compute this embedding"
+
+        chunk = DocumentChunk.objects.get(id=response.data["id"])
+        assert chunk.embedding == mock_embedding_values
+
+    def test_document_chunks_create_with_api_key_live_failed_gracefully(self):
+        """Verify network/API errors fail gracefully and preserve the document chunk."""
+        from unittest.mock import patch
+        self.client.force_authenticate(user=self.user)
+        url = reverse("api:documentchunk-list")
+        self.client.credentials(HTTP_X_GEMINI_API_KEY="failing-key")
+        
+        data = {"document_name": "Failing Doc", "text_content": "Should save but have null embedding"}
+
+        with patch("requests.post", side_effect=Exception("API limit exceeded/network down")):
+            response = self.client.post(url, data, format="json")
+            assert response.status_code == status.HTTP_201_CREATED
+
+        chunk = DocumentChunk.objects.get(id=response.data["id"])
+        assert chunk.embedding is None
+        assert chunk.document_name == "Failing Doc"
+
+    def test_workflow_run_and_submit_form_propagates_headers(self):
+        """Verify that X- API headers are stored inside run.state_data['__env__']."""
+        self.client.force_authenticate(user=self.user)
+        workflow = Workflow.objects.create(
+            name="Propagation Workflow",
+            nodes={
+                "form_1": {
+                    "type": "form_builder",
+                    "fields": [],
+                },
+            },
+            edges=[],
+        )
+
+        headers = {
+            "HTTP_X_GEMINI_API_KEY": "gemini-test-123",
+            "HTTP_X_OPENAI_API_KEY": "openai-test-456",
+            "HTTP_X_TELEGRAM_BOT_TOKEN": "telegram-test-789",
+        }
+        self.client.credentials(**headers)
+
+        # 1. Test WorkflowViewSet.run_workflow propagation
+        run_url = reverse("api:workflow-run-workflow", kwargs={"pk": workflow.id})
+        response = self.client.post(run_url, {"state_data": {"extra": "data"}}, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        run = WorkflowRun.objects.get(id=response.data["id"])
+        assert run.state_data["extra"] == "data"
+        assert run.state_data["__env__"] == {
+            "GEMINI_API_KEY": "gemini-test-123",
+            "OPENAI_API_KEY": "openai-test-456",
+            "TELEGRAM_BOT_TOKEN": "telegram-test-789",
+        }
+
+        # 2. Test WorkflowViewSet.submit_form propagation
+        # Unauthenticate client to verify it still works as an anonymous user (form submission endpoint has AllowAny)
+        self.client.force_authenticate(user=None)
+        submit_url = reverse("api:workflow-submit-form", kwargs={"pk": workflow.id})
+        # Keep client credentials (headers)
+        self.client.credentials(**headers)
+        response = self.client.post(submit_url, {"input_field": "val"}, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+        run_form = WorkflowRun.objects.get(id=response.data["id"])
+        assert run_form.state_data["form_1"] == {"input_field": "val"}
+        assert run_form.state_data["__env__"] == {
+            "GEMINI_API_KEY": "gemini-test-123",
+            "OPENAI_API_KEY": "openai-test-456",
+            "TELEGRAM_BOT_TOKEN": "telegram-test-789",
+        }

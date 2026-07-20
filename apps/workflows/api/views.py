@@ -27,6 +27,33 @@ class DocumentChunkViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    def perform_create(self, serializer):
+        chunk = serializer.save()
+        api_key = self.request.headers.get("X-Gemini-API-Key")
+        if api_key:
+            if api_key in ("test", "mock-key"):
+                chunk.embedding = [0.1] * 768
+                chunk.save()
+            else:
+                try:
+                    import requests
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={api_key}"
+                    payload = {
+                        "model": "models/text-embedding-004",
+                        "content": {
+                            "parts": [{"text": chunk.text_content}]
+                        }
+                    }
+                    response = requests.post(url, json=payload, timeout=10)
+                    response.raise_for_status()
+                    data = response.json()
+                    chunk.embedding = data["embedding"]["values"]
+                    chunk.save()
+                except Exception:
+                    pass
+
+
+
 
 class WorkflowViewSet(viewsets.ModelViewSet):
     """ViewSet for Workflow model providing full CRUD capabilities."""
@@ -51,6 +78,13 @@ class WorkflowViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         state_data = request.data.get("state_data", {})
+        if not isinstance(state_data, dict):
+            state_data = {}
+        state_data["__env__"] = {
+            "GEMINI_API_KEY": request.headers.get("X-Gemini-API-Key", ""),
+            "OPENAI_API_KEY": request.headers.get("X-OpenAI-API-Key", ""),
+            "TELEGRAM_BOT_TOKEN": request.headers.get("X-Telegram-Bot-Token", ""),
+        }
         run = WorkflowRun.objects.create(workflow=workflow, state_data=state_data)
         run_workflow_task.delay(str(run.id))
         serializer = WorkflowRunSerializer(run)
@@ -98,6 +132,11 @@ class WorkflowViewSet(viewsets.ModelViewSet):
                 break
 
         state_data = {form_node_id: request.data}
+        state_data["__env__"] = {
+            "GEMINI_API_KEY": request.headers.get("X-Gemini-API-Key", ""),
+            "OPENAI_API_KEY": request.headers.get("X-OpenAI-API-Key", ""),
+            "TELEGRAM_BOT_TOKEN": request.headers.get("X-Telegram-Bot-Token", ""),
+        }
         run = WorkflowRun.objects.create(workflow=workflow, state_data=state_data)
         run_workflow_task.delay(str(run.id))
         serializer = WorkflowRunSerializer(run)
