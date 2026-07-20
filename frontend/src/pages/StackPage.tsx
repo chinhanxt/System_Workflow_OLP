@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Layers, Save, Eye, EyeOff, Key, Sparkles, Send } from 'lucide-react'
+import { Layers, Save, Eye, EyeOff, Key, Sparkles, Send, AlertTriangle } from 'lucide-react'
 
 export function StackPage() {
   const [geminiKey, setGeminiKey] = useState('')
@@ -61,6 +61,15 @@ export function StackPage() {
           </p>
         </CardHeader>
         <CardContent>
+          {/* Amber Warning Alert Box */}
+          <div className="mb-6 flex gap-3 rounded-2xl border border-amber-200/60 bg-amber-50 p-4 text-xs leading-relaxed text-amber-800 font-medium">
+            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+            <div>
+              <span className="font-bold text-amber-900 block mb-0.5">Cảnh báo bảo mật</span>
+              Các khóa API được lưu trữ dưới dạng văn bản rõ (cleartext) trong <code className="font-mono bg-amber-100 px-1 py-0.5 rounded">localStorage</code> của trình duyệt. Không sử dụng các khóa bảo mật sản xuất (production secrets) trên các thiết bị hoặc máy tính dùng chung.
+            </div>
+          </div>
+
           <form onSubmit={handleSave} className="flex flex-col gap-6">
             
             {/* Gemini API Key */}

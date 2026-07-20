@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { 
   LayoutDashboard, 
@@ -11,8 +12,25 @@ import {
   ChevronDown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import apiClient from '@/api/client'
 
 export function Sidebar() {
+  const [pendingApprovalCount, setPendingApprovalCount] = useState<number>(0)
+
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const res = await apiClient.get('/workflow-runs/')
+        const runs = Array.isArray(res.data) ? res.data : res.data?.results || []
+        const count = runs.filter((run: any) => run.status === 'pending_approval').length
+        setPendingApprovalCount(count)
+      } catch (err) {
+        console.error('Error fetching workflow runs count for sidebar badge:', err)
+      }
+    }
+    fetchPendingCount()
+  }, [])
+
   return (
     <aside className="flex w-64 shrink-0 flex-col bg-white border-r border-slate-100 shadow-[10px_0_30px_rgba(0,0,0,0.01)] z-10">
       {/* Brand logo header */}
@@ -78,7 +96,7 @@ export function Sidebar() {
             </NavLink>
 
             <NavLink
-              to="/messages"
+              to="/runs"
               className={({ isActive }) =>
                 cn(
                   'flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200',
@@ -90,11 +108,13 @@ export function Sidebar() {
             >
               <div className="flex items-center gap-3">
                 <MessageSquare className="h-4 w-4" />
-                <span>Tin nhắn</span>
+                <span>Lịch sử chạy</span>
               </div>
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm">
-                17
-              </span>
+              {pendingApprovalCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm">
+                  {pendingApprovalCount}
+                </span>
+              )}
             </NavLink>
 
             <NavLink

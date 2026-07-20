@@ -8,7 +8,7 @@ import { WorkflowsListPage } from '@/pages/workflows/WorkflowsListPage'
 import { WorkflowEditorPage } from '@/pages/workflows/WorkflowEditorPage'
 import { PublicFormPage } from '@/pages/PublicFormPage'
 import { DocumentsPage } from '@/pages/DocumentsPage'
-import { MessagesPage } from '@/pages/MessagesPage'
+import { WorkflowRunsPage } from '@/pages/WorkflowRunsPage'
 import { StackPage } from '@/pages/StackPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
@@ -26,7 +26,7 @@ export const router = createBrowserRouter([
           { path: '/workflows', element: <WorkflowsListPage /> },
           { path: '/workflows/:id/edit', element: <WorkflowEditorPage /> },
           { path: '/documents', element: <DocumentsPage /> },
-          { path: '/messages', element: <MessagesPage /> },
+          { path: '/runs', element: <WorkflowRunsPage /> },
           { path: '/stack', element: <StackPage /> },
           { path: '/settings', element: <SettingsPage /> },
         ],

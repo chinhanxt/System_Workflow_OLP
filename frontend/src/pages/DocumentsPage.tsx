@@ -53,6 +53,11 @@ export function DocumentsPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Kích thước tệp vượt quá giới hạn cho phép (tối đa 5MB)')
+      return
+    }
+
     const reader = new FileReader()
     reader.onload = (event) => {
       const content = event.target?.result as string

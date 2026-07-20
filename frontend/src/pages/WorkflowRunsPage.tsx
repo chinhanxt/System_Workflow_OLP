@@ -22,7 +22,7 @@ interface Workflow {
   name: string
 }
 
-export function MessagesPage() {
+export function WorkflowRunsPage() {
   const [runs, setRuns] = useState<WorkflowRun[]>([])
   const [workflowsMap, setWorkflowsMap] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,8 +39,40 @@ export function SettingsPage() {
   const [newWebhookName, setNewWebhookName] = useState('')
   const [newWebhookUrl, setNewWebhookUrl] = useState('')
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedHost = localStorage.getItem('smtp_host')
+    if (savedHost !== null) setSmtpHost(savedHost)
+    
+    const savedPort = localStorage.getItem('smtp_port')
+    if (savedPort !== null) setSmtpPort(savedPort)
+    
+    const savedUser = localStorage.getItem('smtp_user')
+    if (savedUser !== null) setSmtpUser(savedUser)
+    
+    const savedPass = localStorage.getItem('smtp_pass')
+    if (savedPass !== null) setSmtpPass(savedPass)
+    
+    const savedSender = localStorage.getItem('smtp_sender')
+    if (savedSender !== null) setSmtpSender(savedSender)
+
+    const savedWebhooks = localStorage.getItem('webhooks')
+    if (savedWebhooks !== null) {
+      try {
+        setWebhooks(JSON.parse(savedWebhooks))
+      } catch (err) {
+        console.error('Error parsing webhooks from localStorage:', err)
+      }
+    }
+  }, [])
+
   const handleSaveSmtp = (e: React.FormEvent) => {
     e.preventDefault()
+    localStorage.setItem('smtp_host', smtpHost)
+    localStorage.setItem('smtp_port', smtpPort)
+    localStorage.setItem('smtp_user', smtpUser)
+    localStorage.setItem('smtp_pass', smtpPass)
+    localStorage.setItem('smtp_sender', smtpSender)
     toast.success('Đã cập nhật cấu hình máy chủ SMTP thành công!')
   }
 
@@ -58,14 +90,18 @@ export function SettingsPage() {
       active: true
     }
 
-    setWebhooks([...webhooks, newItem])
+    const updatedWebhooks = [...webhooks, newItem]
+    setWebhooks(updatedWebhooks)
+    localStorage.setItem('webhooks', JSON.stringify(updatedWebhooks))
     setNewWebhookName('')
     setNewWebhookUrl('')
     toast.success('Đã thêm webhook destination mới!')
   }
 
   const handleRemoveWebhook = (id: string) => {
-    setWebhooks(webhooks.filter(w => w.id !== id))
+    const updatedWebhooks = webhooks.filter(w => w.id !== id)
+    setWebhooks(updatedWebhooks)
+    localStorage.setItem('webhooks', JSON.stringify(updatedWebhooks))
     toast.success('Đã xóa webhook destination')
   }
 
@@ -146,7 +182,10 @@ export function SettingsPage() {
                   <Input
                     id="smtpHost"
                     value={smtpHost}
-                    onChange={(e) => setSmtpHost(e.target.value)}
+                    onChange={(e) => {
+                      setSmtpHost(e.target.value)
+                      localStorage.setItem('smtp_host', e.target.value)
+                    }}
                     placeholder="smtp.example.com"
                     className="rounded-xl"
                   />
@@ -156,7 +195,10 @@ export function SettingsPage() {
                   <Input
                     id="smtpPort"
                     value={smtpPort}
-                    onChange={(e) => setSmtpPort(e.target.value)}
+                    onChange={(e) => {
+                      setSmtpPort(e.target.value)
+                      localStorage.setItem('smtp_port', e.target.value)
+                    }}
                     placeholder="587"
                     className="rounded-xl"
                   />
@@ -168,7 +210,10 @@ export function SettingsPage() {
                 <Input
                   id="smtpUser"
                   value={smtpUser}
-                  onChange={(e) => setSmtpUser(e.target.value)}
+                  onChange={(e) => {
+                    setSmtpUser(e.target.value)
+                    localStorage.setItem('smtp_user', e.target.value)
+                  }}
                   placeholder="user@example.com"
                   className="rounded-xl"
                 />
@@ -180,7 +225,10 @@ export function SettingsPage() {
                   id="smtpPass"
                   type="password"
                   value={smtpPass}
-                  onChange={(e) => setSmtpPass(e.target.value)}
+                  onChange={(e) => {
+                    setSmtpPass(e.target.value)
+                    localStorage.setItem('smtp_pass', e.target.value)
+                  }}
                   placeholder="••••••••••••"
                   className="rounded-xl"
                 />
@@ -191,7 +239,10 @@ export function SettingsPage() {
                 <Input
                   id="smtpSender"
                   value={smtpSender}
-                  onChange={(e) => setSmtpSender(e.target.value)}
+                  onChange={(e) => {
+                    setSmtpSender(e.target.value)
+                    localStorage.setItem('smtp_sender', e.target.value)
+                  }}
                   placeholder="noreply@example.com"
                   className="rounded-xl"
                 />
