@@ -1,8 +1,12 @@
 from collections import deque
+
 from django.utils import timezone
-from apps.workflows.models import WorkflowRun, NodeRunLog
-from apps.workflows.nodes.registry import get_node_class
+
 from apps.workflows.exceptions import PauseWorkflow
+from apps.workflows.models import NodeRunLog
+from apps.workflows.models import WorkflowRun
+from apps.workflows.nodes.registry import get_node_class
+
 
 def get_topological_order(nodes: dict, edges: list) -> list:
     """
@@ -10,7 +14,7 @@ def get_topological_order(nodes: dict, edges: list) -> list:
     Detects cycles and raises ValueError if a cycle is present.
     """
     adj = {nid: [] for nid in nodes}
-    in_degree = {nid: 0 for nid in nodes}
+    in_degree = dict.fromkeys(nodes, 0)
 
     for edge in edges:
         source = edge.get("source")
@@ -31,8 +35,10 @@ def get_topological_order(nodes: dict, edges: list) -> list:
                 queue.append(neighbor)
 
     if len(order) != len(nodes):
-        raise ValueError("Cycle detected in workflow edges")
+        msg = "Cycle detected in workflow edges"
+        raise ValueError(msg)
     return order
+
 
 def run_workflow(workflow_run_id: str):
     """
@@ -78,7 +84,7 @@ def run_workflow(workflow_run_id: str):
                 # 2. If source is a condition, the edge handle must match condition outcome
                 if src in skipped_nodes:
                     continue
-                
+
                 src_conf = nodes.get(src, {})
                 if src_conf.get("type") == "condition":
                     # Get condition node output
@@ -86,10 +92,10 @@ def run_workflow(workflow_run_id: str):
                     next_branch = src_output.get("next_branch")
                     if edge.get("sourceHandle") != next_branch:
                         continue
-                
+
                 all_inactive = False
                 break
-            
+
             if all_inactive:
                 skipped_nodes.add(node_id)
 
@@ -100,7 +106,7 @@ def run_workflow(workflow_run_id: str):
         existing_log = NodeRunLog.objects.filter(
             workflow_run=run,
             node_id=node_id,
-            status=NodeRunLog.Status.SUCCESS
+            status=NodeRunLog.Status.SUCCESS,
         ).first()
 
         if existing_log:
@@ -119,8 +125,8 @@ def run_workflow(workflow_run_id: str):
                 "node_type": node_type,
                 "status": NodeRunLog.Status.RUNNING,
                 "input_data": run.state_data.copy(),
-                "started_at": timezone.now()
-            }
+                "started_at": timezone.now(),
+            },
         )
         if not created:
             log.status = NodeRunLog.Status.RUNNING
@@ -137,7 +143,10 @@ def run_workflow(workflow_run_id: str):
             if node_type == "condition":
                 next_branch = outputs.get("next_branch")
                 if next_branch not in ["true", "false"]:
-                    raise ValueError(f"Condition node must return 'true' or 'false' in 'next_branch', got: {next_branch}")
+                    msg = f"Condition node must return 'true' or 'false' in 'next_branch', got: {next_branch}"
+                    raise ValueError(
+                        msg,
+                    )
 
             log.status = NodeRunLog.Status.SUCCESS
             log.output_data = outputs
@@ -164,7 +173,10 @@ def run_workflow(workflow_run_id: str):
 
             run.status = WorkflowRun.Status.FAILED
             run.finished_at = timezone.now()
-            run.state_data = {**run.state_data, "error": f"Error in node {node_id}: {str(e)}"}
+            run.state_data = {
+                **run.state_data,
+                "error": f"Error in node {node_id}: {e!s}",
+            }
             run.save()
             return
 

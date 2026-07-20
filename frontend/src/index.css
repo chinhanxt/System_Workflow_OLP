@@ -1,7 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+@theme {
+  --font-sans: "Outfit", "Inter", system-ui, sans-serif;
+  
+  /* Core palette */
+  --color-app-bg: #f0f3f8;
+  --color-primary-accent: #355bf5;
+  --color-primary-hover: #1d4ed8;
+  --color-border-subtle: #e2e8f0;
 }
 
 html,
@@ -12,8 +19,9 @@ body,
 
 body {
   margin: 0;
-  background: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-app-bg);
+  font-family: var(--font-sans);
+  color: #1e293b;
 }
 
 /* sonner toast: allow multi-line messages */

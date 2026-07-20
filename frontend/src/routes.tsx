@@ -4,9 +4,17 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { UsersPage } from '@/pages/UsersPage'
+import { WorkflowsListPage } from '@/pages/workflows/WorkflowsListPage'
+import { WorkflowEditorPage } from '@/pages/workflows/WorkflowEditorPage'
+import { PublicFormPage } from '@/pages/PublicFormPage'
+import { DocumentsPage } from '@/pages/DocumentsPage'
+import { MessagesPage } from '@/pages/MessagesPage'
+import { StackPage } from '@/pages/StackPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: '/public/form/:id', element: <PublicFormPage /> },
   {
     element: <ProtectedRoute />,
     children: [
@@ -15,6 +23,12 @@ export const router = createBrowserRouter([
         children: [
           { path: '/', element: <DashboardPage /> },
           { path: '/users', element: <UsersPage /> },
+          { path: '/workflows', element: <WorkflowsListPage /> },
+          { path: '/workflows/:id/edit', element: <WorkflowEditorPage /> },
+          { path: '/documents', element: <DocumentsPage /> },
+          { path: '/messages', element: <MessagesPage /> },
+          { path: '/stack', element: <StackPage /> },
+          { path: '/settings', element: <SettingsPage /> },
         ],
       },
     ],

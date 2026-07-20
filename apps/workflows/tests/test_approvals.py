@@ -1,7 +1,12 @@
-import pytest
 from unittest.mock import patch
-from apps.workflows.models import Workflow, WorkflowRun, NodeRunLog
+
+import pytest
+
 from apps.workflows.engine.executor import run_workflow
+from apps.workflows.models import NodeRunLog
+from apps.workflows.models import Workflow
+from apps.workflows.models import WorkflowRun
+
 
 @pytest.mark.django_db
 def test_approval_flow_pause_resume():
@@ -15,13 +20,13 @@ def test_approval_flow_pause_resume():
                 "data": {
                     "bot_token": "mock_token",
                     "chat_id": "123",
-                    "message": "Approved value: {n1.decision}"
-                }
-            }
+                    "message": "Approved value: {n1.decision}",
+                },
+            },
         },
         edges=[
-            {"source": "n1", "target": "n2"}
-        ]
+            {"source": "n1", "target": "n2"},
+        ],
     )
 
     # 2. Run workflow. It should stop at n1 and set run status to pending_approval.
@@ -53,8 +58,12 @@ def test_approval_flow_pause_resume():
 
         run.refresh_from_db()
         assert run.status == WorkflowRun.Status.SUCCESS
-        assert run.state_data["n2"] == {"status": "sent", "message": "Approved value: approved"}
+        assert run.state_data["n2"] == {
+            "status": "sent",
+            "message": "Approved value: approved",
+        }
         mock_post.assert_called_once()
+
 
 @pytest.mark.django_db
 def test_condition_router_logical_execution():
@@ -69,27 +78,37 @@ def test_condition_router_logical_execution():
                 "data": {
                     "variable": "input_val.amount",
                     "operator": ">",
-                    "value": 50
-                }
+                    "value": 50,
+                },
             },
             "n2": {
                 "type": "telegram_notify",
-                "data": {"bot_token": "mock_token", "chat_id": "123", "message": "True branch"}
+                "data": {
+                    "bot_token": "mock_token",
+                    "chat_id": "123",
+                    "message": "True branch",
+                },
             },
             "n3": {
                 "type": "telegram_notify",
-                "data": {"bot_token": "mock_token", "chat_id": "123", "message": "False branch"}
-            }
+                "data": {
+                    "bot_token": "mock_token",
+                    "chat_id": "123",
+                    "message": "False branch",
+                },
+            },
         },
         edges=[
             {"source": "n1", "target": "n2", "sourceHandle": "true"},
-            {"source": "n1", "target": "n3", "sourceHandle": "false"}
-        ]
+            {"source": "n1", "target": "n3", "sourceHandle": "false"},
+        ],
     )
 
     # Run 1: amount is 100 -> should go to True branch (n2)
-    run1 = WorkflowRun.objects.create(workflow=workflow, state_data={"input_val": {"amount": 100}})
-    with patch("requests.post") as mock_post:
+    run1 = WorkflowRun.objects.create(
+        workflow=workflow, state_data={"input_val": {"amount": 100}},
+    )
+    with patch("requests.post"):
         run_workflow(str(run1.id))
         run1.refresh_from_db()
         assert run1.status == WorkflowRun.Status.SUCCESS
@@ -99,8 +118,10 @@ def test_condition_router_logical_execution():
         assert not NodeRunLog.objects.filter(workflow_run=run1, node_id="n3").exists()
 
     # Run 2: amount is 10 -> should go to False branch (n3)
-    run2 = WorkflowRun.objects.create(workflow=workflow, state_data={"input_val": {"amount": 10}})
-    with patch("requests.post") as mock_post:
+    run2 = WorkflowRun.objects.create(
+        workflow=workflow, state_data={"input_val": {"amount": 10}},
+    )
+    with patch("requests.post"):
         run_workflow(str(run2.id))
         run2.refresh_from_db()
         assert run2.status == WorkflowRun.Status.SUCCESS

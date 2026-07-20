@@ -1,5 +1,6 @@
 from typing import Any
 
+
 class BaseNode:
     node_type = "base"
 
@@ -12,4 +13,5 @@ class BaseNode:
         Execute the node logic.
         Must return a dict of output variables or raise an exception.
         """
-        raise NotImplementedError("Subclasses must implement execute")
+        msg = "Subclasses must implement execute"
+        raise NotImplementedError(msg)

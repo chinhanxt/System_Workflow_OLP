@@ -1,7 +1,9 @@
 import pytest
 from django.utils import timezone
 
-from apps.workflows.models import NodeRunLog, Workflow, WorkflowRun
+from apps.workflows.models import NodeRunLog
+from apps.workflows.models import Workflow
+from apps.workflows.models import WorkflowRun
 
 
 @pytest.mark.django_db

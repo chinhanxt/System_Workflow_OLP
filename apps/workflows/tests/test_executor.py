@@ -1,8 +1,12 @@
 import pytest
-from apps.workflows.models import Workflow, WorkflowRun, NodeRunLog
+
+from apps.workflows.engine.executor import get_topological_order
+from apps.workflows.engine.executor import run_workflow
+from apps.workflows.models import NodeRunLog
+from apps.workflows.models import Workflow
+from apps.workflows.models import WorkflowRun
 from apps.workflows.nodes.base import BaseNode
 from apps.workflows.nodes.registry import register_node
-from apps.workflows.engine.executor import get_topological_order, run_workflow
 
 
 # Define and register test nodes
@@ -23,7 +27,8 @@ class DummyErrorNode(BaseNode):
     node_type = "test_error"
 
     def execute(self, state_data: dict) -> dict:
-        raise ValueError("Intentional test error")
+        msg = "Intentional test error"
+        raise ValueError(msg)
 
 
 def test_topological_order_valid():
@@ -163,8 +168,8 @@ def test_executor_conditional_branching_true():
                 "data": {
                     "variable": "branch_val",
                     "operator": "==",
-                    "value": "true"
-                }
+                    "value": "true",
+                },
             },
             "n3": {"type": "test_simple", "data": {"val": 10}},
             "n4": {"type": "test_simple", "data": {"val": 20}},
@@ -179,7 +184,9 @@ def test_executor_conditional_branching_true():
             {"source": "n4", "target": "n6"},
         ],
     )
-    run = WorkflowRun.objects.create(workflow=workflow, state_data={"branch_val": "true"})
+    run = WorkflowRun.objects.create(
+        workflow=workflow, state_data={"branch_val": "true"},
+    )
     run_workflow(str(run.id))
 
     run.refresh_from_db()
@@ -229,8 +236,8 @@ def test_executor_conditional_branching_false():
                 "data": {
                     "variable": "branch_val",
                     "operator": "==",
-                    "value": "true"
-                }
+                    "value": "true",
+                },
             },
             "n3": {"type": "test_simple", "data": {"val": 10}},
             "n4": {"type": "test_simple", "data": {"val": 20}},
@@ -245,7 +252,9 @@ def test_executor_conditional_branching_false():
             {"source": "n4", "target": "n6"},
         ],
     )
-    run = WorkflowRun.objects.create(workflow=workflow, state_data={"branch_val": "false"})
+    run = WorkflowRun.objects.create(
+        workflow=workflow, state_data={"branch_val": "false"},
+    )
     run_workflow(str(run.id))
 
     run.refresh_from_db()
@@ -296,8 +305,8 @@ def test_executor_conditional_join_merge():
                 "data": {
                     "variable": "branch_val",
                     "operator": "==",
-                    "value": "true"
-                }
+                    "value": "true",
+                },
             },
             "n3": {"type": "test_simple", "data": {"val": 10}},
             "n4": {"type": "test_simple", "data": {"val": 20}},
@@ -313,18 +322,35 @@ def test_executor_conditional_join_merge():
             {"source": "n5", "target": "n6"},
         ],
     )
-    run = WorkflowRun.objects.create(workflow=workflow, state_data={"branch_val": "true"})
+    run = WorkflowRun.objects.create(
+        workflow=workflow, state_data={"branch_val": "true"},
+    )
     run_workflow(str(run.id))
 
     run.refresh_from_db()
     assert run.status == WorkflowRun.Status.SUCCESS
 
     # n1, n2, n3, n5, n6 should succeed and be logged
-    assert NodeRunLog.objects.get(workflow_run=run, node_id="n1").status == NodeRunLog.Status.SUCCESS
-    assert NodeRunLog.objects.get(workflow_run=run, node_id="n2").status == NodeRunLog.Status.SUCCESS
-    assert NodeRunLog.objects.get(workflow_run=run, node_id="n3").status == NodeRunLog.Status.SUCCESS
-    assert NodeRunLog.objects.get(workflow_run=run, node_id="n5").status == NodeRunLog.Status.SUCCESS
-    assert NodeRunLog.objects.get(workflow_run=run, node_id="n6").status == NodeRunLog.Status.SUCCESS
+    assert (
+        NodeRunLog.objects.get(workflow_run=run, node_id="n1").status
+        == NodeRunLog.Status.SUCCESS
+    )
+    assert (
+        NodeRunLog.objects.get(workflow_run=run, node_id="n2").status
+        == NodeRunLog.Status.SUCCESS
+    )
+    assert (
+        NodeRunLog.objects.get(workflow_run=run, node_id="n3").status
+        == NodeRunLog.Status.SUCCESS
+    )
+    assert (
+        NodeRunLog.objects.get(workflow_run=run, node_id="n5").status
+        == NodeRunLog.Status.SUCCESS
+    )
+    assert (
+        NodeRunLog.objects.get(workflow_run=run, node_id="n6").status
+        == NodeRunLog.Status.SUCCESS
+    )
 
     # n4 should be skipped
     assert not NodeRunLog.objects.filter(workflow_run=run, node_id="n4").exists()
@@ -334,4 +360,3 @@ def test_executor_conditional_join_merge():
     assert "n5" in run.state_data
     assert "n6" in run.state_data
     assert "n4" not in run.state_data
-
