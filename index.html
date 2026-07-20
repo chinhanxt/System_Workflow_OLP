@@ -124,7 +124,7 @@
         /* Layout Grids */
         .grid-2 {
             display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
+            grid-template-columns: 1.2fr 0.8fr;
             gap: 4rem;
             align-items: center;
         }
@@ -180,12 +180,12 @@
         }
 
         .step-list li {
-            font-size: 2rem;
-            line-height: 1.5;
-            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            line-height: 1.4;
+            margin-bottom: 1.8rem;
             position: relative;
             padding-left: 3.5rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-dark);
         }
 
@@ -403,14 +403,6 @@
             transition: var(--transition-smooth);
         }
 
-        .node-group:hover {
-            filter: drop-shadow(0 8px 16px rgba(0, 102, 245, 0.3));
-        }
-
-        .node-group.active {
-            filter: drop-shadow(0 12px 24px rgba(0, 212, 178, 0.55));
-        }
-
         .node-group polygon.face-top {
             fill: #E9F2FF;
             stroke: var(--secondary);
@@ -480,6 +472,14 @@
         }
         .center-node polygon.face-right {
             fill: #A0B2C6;
+        }
+
+        .node-group:hover {
+            filter: drop-shadow(0 8px 16px rgba(0, 102, 245, 0.3));
+        }
+
+        .node-group.active {
+            filter: drop-shadow(0 12px 24px rgba(0, 212, 178, 0.55));
         }
 
         /* Navigation controls */
@@ -604,25 +604,25 @@
                         TRONG THỰC CHIẾN
                     </h1>
                     <p class="text-large" style="color: #A0AEC0; max-width: 900px; margin: 0 auto 3rem; font-weight: 600;">
-                        Sơ đồ tư duy tương tác & Các bước thực thi câu lệnh chuẩn mực tại doanh nghiệp
+                        Sơ đồ tư duy tương tác & Giải thích chức năng câu lệnh thực thi chuẩn GitHub
                     </p>
                     <button onclick="nextSlide()" class="btn-nav" style="width: auto; height: auto; padding: 1.2rem 3rem; border-radius: 50px; background: var(--accent); border: none; color: var(--primary); font-size: 1.6rem; font-weight: 800;">
                         Khám phá Sơ đồ tư duy &rarr;
                     </button>
                 </div>
-                <div class="slide-counter">Slide 1 / 8</div>
+                <div class="slide-counter">Slide 1 / 7</div>
             </div>
 
             <!-- SLIDE 2: GRAND INTERACTIVE MINDMAP (Theme Light - Circular Isometric) -->
             <div class="slide">
                 <div class="slide-header">
                     <h2>Sơ Đồ Tư Duy Luồng Đi Của Code & Các Câu Lệnh</h2>
-                    <p>Click các node để xem mô tả lệnh và chạy thử nghiệm console</p>
+                    <p>Click các node để xem chức năng chi tiết của các lệnh tương ứng</p>
                 </div>
                 
                 <div class="slide-body">
                     <div class="grand-mindmap-layout">
-                        <!-- Left: Circular Isometric SVG Mindmap based on the provided model image -->
+                        <!-- Left: Circular Isometric SVG Mindmap -->
                         <div class="mindmap-viewport">
                             <svg class="mindmap-svg" viewBox="0 0 760 460">
                                 <defs>
@@ -645,13 +645,10 @@
                                     
                                     <!-- Developer Icon/Drawing representation on center platform -->
                                     <g transform="translate(380, 222) scale(0.85)">
-                                        <!-- Monitor / Code Editor visual -->
                                         <rect x="-24" y="-30" width="48" height="32" rx="4" fill="#0A2540" />
                                         <rect x="-20" y="-26" width="40" height="24" rx="2" fill="#00D4B2" />
-                                        <!-- Code lines on monitor -->
                                         <line x1="-14" y1="-20" x2="-2" y2="-20" stroke="#0A2540" stroke-width="2" />
                                         <line x1="-14" y1="-14" x2="6" y2="-14" stroke="#0A2540" stroke-width="2" />
-                                        <!-- Laptop stand -->
                                         <polygon points="-8,2 -16,8 16,8 8,2" fill="#0A2540" />
                                         <rect x="-4" y="2" width="8" height="6" fill="#879EB5" />
                                     </g>
@@ -718,7 +715,7 @@
                                         <path d="M-12,8 A8,8 0 0,1 -10,-8 A12,12 0 0,1 10,-8 A10,10 0 0,1 12,8 Z" fill="#0066F5" />
                                     </g>
                                     <text x="600" y="195" class="label-title">GITHUB</text>
-                                    <text x="600" y="210" class="label-sub">Đám mây máy chủ</text>
+                                    <text x="600" y="210" class="label-sub">Kho chứa đám mây</text>
                                 </g>
 
                                 <!-- NODE 5: CI/CD DEPLOY (Bottom-Right: 490, 370) -->
@@ -758,40 +755,52 @@
                         <div class="mindmap-explanation">
                             <div>
                                 <h3 id="ex-title">1. Workspace</h3>
-                                <p id="ex-desc">Thư mục vật lý trên ổ cứng của bạn. Đây là nơi bạn mở VS Code lên, tạo/sửa file trực tiếp. Mọi thay đổi ở đây chưa được Git lưu vết chính thức.</p>
+                                <p id="ex-desc">Thư mục vật lý chứa mã nguồn dự án trên máy tính của bạn. Mọi chỉnh sửa ở đây chưa được Git ghi nhận cho đến khi sử dụng câu lệnh add.</p>
                             </div>
                             <div class="console-run">
-                                <div class="console-run-title">CÂU LỆNH LIÊN QUAN</div>
+                                <div class="console-run-title">CÂU LỆNH LIÊN QUAN & CHỨC NĂNG</div>
                                 <code class="console-run-cmd" id="ex-cmd">git status</code>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="slide-counter">Slide 2 / 8</div>
+                <div class="slide-counter">Slide 2 / 7</div>
             </div>
 
             <!-- SLIDE 3: TRUNK-BASED DEVELOPMENT -->
             <div class="slide">
                 <div class="slide-header">
                     <h2>Trunk-Based Development</h2>
-                    <p>Workflow gộp code siêu ngắn - Động cơ thúc đẩy CI/CD</p>
+                    <p>Quy trình thực thi chi tiết câu lệnh Git</p>
                 </div>
                 
                 <div class="slide-body">
                     <div class="grid-2">
                         <div>
                             <ul class="step-list">
-                                <li data-step="1">Đồng bộ mã nguồn mới nhất từ main:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Luôn cập nhật để tránh xung đột code.</p>
+                                <li data-step="1">
+                                    <code>git checkout main</code> & <code>git pull origin main</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Chuyển về nhánh <code>main</code> và tải toàn bộ code mới nhất của team từ GitHub về máy cá nhân để tránh bị xung đột code (conflict).
+                                    </p>
                                 </li>
-                                <li data-step="2">Tạo nhánh tính năng siêu ngắn hạn (sống dưới 24h):
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Phục vụ các commit cực nhỏ.</p>
+                                <li data-step="2">
+                                    <code>git checkout -b &lt;tên-nhánh-ngắn-hạn&gt;</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Tạo ra một nhánh làm việc mới từ main và tự động chuyển sang nhánh đó để bắt đầu code (nhánh chỉ nên tồn tại dưới 24h).
+                                    </p>
                                 </li>
-                                <li data-step="3">Commit và push liên tục trong ngày:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Tích hợp code ngay khi hoàn thành một phần nhỏ.</p>
+                                <li data-step="3">
+                                    <code>git add .</code> & <code>git commit -m &quot;&lt;nội-dung-thực-hiện&gt;&quot;</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Gom toàn bộ tệp tin đã sửa đổi vào vùng chờ (Staging Area), sau đó lưu một ảnh chụp (snapshot) chính thức vào lịch sử lưu trữ trên máy cá nhân.
+                                    </p>
                                 </li>
-                                <li data-step="4">Gộp trực tiếp vào main sau khi Test pass tự động:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Sử dụng Feature Flags để bật/tắt tính năng.</p>
+                                <li data-step="4">
+                                    <code>git push origin &lt;tên-nhánh-ngắn-hạn&gt;</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Đẩy nhánh làm việc từ máy của bạn lên GitHub để kích hoạt CI/CD kiểm tra code và chuẩn bị gộp ngay vào <code>main</code>.
+                                    </p>
                                 </li>
                             </ul>
                         </div>
@@ -805,7 +814,7 @@
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout main</span><button class="btn-copy" onclick="copyText('git checkout main')">Copy</button></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git pull origin main</span><button class="btn-copy" onclick="copyText('git pull origin main')">Copy</button></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout -b feat/small-toggle</span><button class="btn-copy" onclick="copyText('git checkout -b feat/small-toggle')">Copy</button></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Code và commit ngay lập tức</span></div>
+                                <div class="terminal-line"><span class="terminal-comment"># Code chỉnh sửa...</span></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git add .</span><button class="btn-copy" onclick="copyText('git add .')">Copy</button></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git commit -m "feat: add feature flag"</span><button class="btn-copy" onclick="copyText('git commit -m \"feat: add feature flag\"')">Copy</button></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push origin feat/small-toggle</span><button class="btn-copy" onclick="copyText('git push origin feat/small-toggle')">Copy</button></div>
@@ -813,31 +822,43 @@
                         </div>
                     </div>
                 </div>
-                <div class="slide-counter">Slide 3 / 8</div>
+                <div class="slide-counter">Slide 3 / 7</div>
             </div>
 
             <!-- SLIDE 4: GITHUB FLOW -->
             <div class="slide">
                 <div class="slide-header">
                     <h2>GitHub Flow</h2>
-                    <p>Mô hình Nhánh Tính Năng (Feature Branch) cho Web & SaaS</p>
+                    <p>Quy trình thực thi chi tiết câu lệnh Git</p>
                 </div>
                 
                 <div class="slide-body">
                     <div class="grid-2">
                         <div>
                             <ul class="step-list">
-                                <li data-step="1">Tạo nhánh tính năng có tên rõ ràng:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Ví dụ: <code>feature/login-page</code>.</p>
+                                <li data-step="1">
+                                    <code>git checkout -b feature/login-page</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Tạo và di chuyển sang một nhánh tính năng riêng biệt để cô lập code đang phát triển, không ảnh hưởng tới nhánh chính `main`.
+                                    </p>
                                 </li>
-                                <li data-step="2">Phát triển tính năng và tạo commit cục bộ:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Mỗi commit đại diện cho một phần hoàn thiện.</p>
+                                <li data-step="2">
+                                    <code>git add .</code> & <code>git commit -m &quot;feat(auth): add UI login&quot;</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Gom các file thay đổi vào khu vực chờ và ghi nhận lịch sử commit kèm thông tin chuẩn hóa để nhóm dễ theo dõi.
+                                    </p>
                                 </li>
-                                <li data-step="3">Đẩy nhánh lên GitHub & mở Pull Request (PR):
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Yêu cầu đội ngũ Review Code.</p>
+                                <li data-step="3">
+                                    <code>git push -u origin feature/login-page</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Đẩy nhánh lên GitHub, đồng thời thiết lập liên kết theo dõi (upstream tracking) để tạo điều kiện mở Pull Request trên web GitHub.
+                                    </p>
                                 </li>
-                                <li data-step="4">Thảo luận, chỉnh sửa code và Merge vào main:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Deploy trực tiếp từ main lên môi trường Production.</p>
+                                <li data-step="4">
+                                    <code>git checkout main</code> & <code>git merge feature/login-page</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Chuyển về nhánh chính <code>main</code> và thực hiện gộp (merge) toàn bộ code của nhánh tính năng đã được duyệt vào <code>main</code> để chuẩn bị release.
+                                    </p>
                                 </li>
                             </ul>
                         </div>
@@ -852,37 +873,49 @@
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git add .</span><button class="btn-copy" onclick="copyText('git add .')">Copy</button></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git commit -m "feat(auth): add UI login"</span><button class="btn-copy" onclick="copyText('git commit -m \"feat(auth): add UI login\"')">Copy</button></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push -u origin feature/login-page</span><button class="btn-copy" onclick="copyText('git push -u origin feature/login-page')">Copy</button></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Gộp sau khi PR được duyệt</span></div>
+                                <div class="terminal-line"><span class="terminal-comment"># Gộp code sau khi Pull Request được duyệt</span></div>
                                 <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout main && git merge feature/login-page</span><button class="btn-copy" onclick="copyText('git checkout main && git merge feature/login-page')">Copy</button></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="slide-counter">Slide 4 / 8</div>
+                <div class="slide-counter">Slide 4 / 7</div>
             </div>
 
             <!-- SLIDE 5: GIT FLOW -->
             <div class="slide">
                 <div class="slide-header">
                     <h2>Git Flow</h2>
-                    <p>Phát hành (Release) chặt chẽ cho Mobile App và Thư viện SDK</p>
+                    <p>Quy trình thực thi chi tiết câu lệnh Git</p>
                 </div>
                 
                 <div class="slide-body">
                     <div class="grid-2">
                         <div>
                             <ul class="step-list">
-                                <li data-step="1">Feature phát triển từ develop:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Làm việc trên nhánh <code>feature/*</code>, merge về <code>develop</code>.</p>
+                                <li data-step="1">
+                                    <code>git checkout -b release/v1.0.0 develop</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Tách nhánh Release từ nhánh phát triển chính <code>develop</code> để cô lập phiên bản chuẩn bị phát hành nhằm tập trung sửa lỗi (fix bug).
+                                    </p>
                                 </li>
-                                <li data-step="2">Tạo nhánh Release để chuẩn bị phát hành phiên bản:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Nhánh <code>release/vX.Y.Z</code> chỉ để fix bug.</p>
+                                <li data-step="2">
+                                    <code>git merge release/v1.0.0</code> (trên nhánh main)
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Chuyển sang nhánh <code>main</code> và thực hiện gộp nhánh release đã fix lỗi hoàn chỉnh để chuẩn bị xuất xưởng chính thức.
+                                    </p>
                                 </li>
-                                <li data-step="3">Merge Release vào cả main và develop:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Gắn nhãn (Tag) phiên bản trên nhánh <code>main</code>.</p>
+                                <li data-step="3">
+                                    <code>git tag -a v1.0.0 -m "Tag release"</code>
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Tạo một nhãn (Tag) phiên bản v1.0.0 không đổi trên nhánh <code>main</code> để đánh dấu mốc lịch sử phát hành sản phẩm.
+                                    </p>
                                 </li>
-                                <li data-step="4">Hotfix khẩn cấp trực tiếp từ main:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Tạo nhánh <code>hotfix/*</code> sửa lỗi gấp và merge lại.</p>
+                                <li data-step="4">
+                                    <code>git merge release/v1.0.0</code> (trên nhánh develop)
+                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 500; margin-top: 0.2rem;">
+                                        <strong>Chức năng:</strong> Gộp ngược lại nhánh release vào nhánh <code>develop</code> để đảm bảo các lỗi đã được sửa trên bản release cũng được cập nhật vào mã nguồn phát triển tiếp theo.
+                                    </p>
                                 </li>
                             </ul>
                         </div>
@@ -902,59 +935,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="slide-counter">Slide 5 / 8</div>
+                <div class="slide-counter">Slide 5 / 7</div>
             </div>
 
-            <!-- SLIDE 6: GITLAB FLOW -->
-            <div class="slide">
-                <div class="slide-header">
-                    <h2>GitLab Flow</h2>
-                    <p>Liên kết nhánh Git trực tiếp với các Môi trường triển khai (Environments)</p>
-                </div>
-                
-                <div class="slide-body">
-                    <div class="grid-2">
-                        <div>
-                            <ul class="step-list">
-                                <li data-step="1">Mọi tính năng được tích hợp trước vào main:
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Main là trung tâm tích hợp liên tục.</p>
-                                </li>
-                                <li data-step="2">Chuyển mã nguồn lên môi trường Staging (Kiểm thử):
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Merge nhánh <code>main</code> vào nhánh <code>staging</code>.</p>
-                                </li>
-                                <li data-step="3">Phát hành lên Production (Môi trường thật):
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Merge nhánh <code>staging</code> vào nhánh <code>production</code>.</p>
-                                </li>
-                                <li data-step="4">Sửa lỗi xuôi dòng (Cherry-pick):
-                                    <p style="font-size: 1.4rem; color: var(--text-dark); opacity: 0.8; font-weight: 400; margin-top: 0.2rem;">Fix bug ở main trước, sau đó gộp vào các nhánh staging/production.</p>
-                                </li>
-                            </ul>
-                        </div>
-                        
-                        <div class="terminal-block">
-                            <div class="terminal-header">
-                                <div class="terminal-dots"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div></div>
-                                <div class="terminal-title">GitLab Flow Script</div>
-                            </div>
-                            <div class="terminal-content">
-                                <div class="terminal-line"><span class="terminal-comment"># Tải lên môi trường Staging</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout staging && git merge main</span><button class="btn-copy" onclick="copyText('git checkout staging && git merge main')">Copy</button></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push origin staging</span><button class="btn-copy" onclick="copyText('git push origin staging')">Copy</button></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Tải lên Production chính thức</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout production && git merge staging</span><button class="btn-copy" onclick="copyText('git checkout production && git merge staging')">Copy</button></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push origin production</span><button class="btn-copy" onclick="copyText('git push origin production')">Copy</button></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="slide-counter">Slide 6 / 8</div>
-            </div>
-
-            <!-- SLIDE 7: CHEAT SHEET CỨU HỘ KHẨN CẤP -->
+            <!-- SLIDE 6: CHEAT SHEET CỨU HỘ KHẨN CẤP -->
             <div class="slide">
                 <div class="slide-header">
                     <h2>Cheat Sheet: Lệnh Xử Lý Sự Cố Khẩn Cấp</h2>
-                    <p>Các câu lệnh giải cứu khi gõ nhầm hoặc xảy ra xung đột code (Conflict)</p>
+                    <p>Giải thích chức năng chi tiết các câu lệnh giải cứu</p>
                 </div>
                 
                 <div class="slide-body">
@@ -964,12 +952,14 @@
                                 <div class="terminal-title">1. HUỶ COMMIT HOẶC KHÔI PHỤC FILE</div>
                             </div>
                             <div class="terminal-content">
-                                <div class="terminal-line"><span class="terminal-comment"># Huỷ commit gần nhất nhưng giữ lại code đã viết</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git reset HEAD~1</span></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Huỷ bỏ toàn bộ code đã sửa chưa commit</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git reset --hard HEAD</span></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Khôi phục 1 file cụ thể về phiên bản commit trước</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout HEAD -- filepath</span></div>
+                                <div class="terminal-line"><span class="terminal-cmd">git reset HEAD~1</span></div>
+                                <div style="font-size:1.2rem; color:#A0AEC0; margin:-0.5rem 0 1rem 0;">➜ <strong>Chức năng:</strong> Hủy bỏ commit gần nhất trên máy, đưa code trở về trạng thái chưa commit (Staging/Workspace) để bạn sửa đổi.</div>
+
+                                <div class="terminal-line"><span class="terminal-cmd">git reset --hard HEAD</span></div>
+                                <div style="font-size:1.2rem; color:#A0AEC0; margin:-0.5rem 0 1rem 0;">➜ <strong>Chức năng:</strong> Xóa sạch toàn bộ những gì bạn vừa sửa đổi chưa commit, đưa Workspace về trạng thái sạch của commit gần nhất.</div>
+
+                                <div class="terminal-line"><span class="terminal-cmd">git checkout HEAD -- file_path</span></div>
+                                <div style="font-size:1.2rem; color:#A0AEC0; margin:-0.5rem 0 0 0;">➜ <strong>Chức năng:</strong> Khôi phục duy nhất tệp tin được chỉ định về phiên bản commit gần nhất để hủy các chỉnh sửa lỗi trên file đó.</div>
                             </div>
                         </div>
 
@@ -978,33 +968,35 @@
                                 <div class="terminal-title">2. LƯU TẠM & GIẢI QUYẾT XUNG ĐỘT</div>
                             </div>
                             <div class="terminal-content">
-                                <div class="terminal-line"><span class="terminal-comment"># Cất giữ tạm thời code đang viết để pull code mới</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git stash</span></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Lấy lại code đã cất giữ sau khi đã pull</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git stash pop</span></div>
-                                <div class="terminal-line"><span class="terminal-comment"># Xem các tệp tin đang bị xung đột (Conflict)</span></div>
-                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git diff --name-only --diff-filter=U</span></div>
+                                <div class="terminal-line"><span class="terminal-cmd">git stash</span></div>
+                                <div style="font-size:1.2rem; color:#A0AEC0; margin:-0.5rem 0 1rem 0;">➜ <strong>Chức năng:</strong> Cất tạm thời toàn bộ các thay đổi chưa hoàn thiện vào bộ nhớ tạm ẩn để dọn sạch Workspace giúp pull code mà không bị lỗi.</div>
+
+                                <div class="terminal-line"><span class="terminal-cmd">git stash pop</span></div>
+                                <div style="font-size:1.2rem; color:#A0AEC0; margin:-0.5rem 0 1rem 0;">➜ <strong>Chức năng:</strong> Lấy lại các thay đổi đã cất tạm thời trước đó ra Workspace để tiếp tục viết code.</div>
+
+                                <div class="terminal-line"><span class="terminal-cmd">git diff --name-only --diff-filter=U</span></div>
+                                <div style="font-size:1.2rem; color:#A0AEC0; margin:-0.5rem 0 0 0;">➜ <strong>Chức năng:</strong> Liệt kê nhanh danh sách các tệp tin đang bị xung đột (conflict) chưa được giải quyết sau khi merge.</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="slide-counter">Slide 7 / 8</div>
+                <div class="slide-counter">Slide 6 / 7</div>
             </div>
 
-            <!-- SLIDE 8: END (Theme Dark) -->
+            <!-- SLIDE 7: END (Theme Dark) -->
             <div class="slide theme-dark">
                 <div></div>
                 <div class="slide-body" style="align-items: center; text-align: center;">
                     <span class="badge badge-accent">KẾT THÚC</span>
                     <h1 class="text-huge">HÃY BẮT ĐẦU THỰC HÀNH!</h1>
                     <p class="text-large" style="color: #A0AEC0; max-width: 850px; margin: 0 auto 3rem; font-weight: 600;">
-                        Cách tốt nhất để nhớ lệnh Git là gõ chúng hàng ngày. Sử dụng đúng Git Workflow giúp team của bạn vận hành trơn tru và phát hành mã nguồn an toàn hơn.
+                        Cách tốt nhất để nhớ lệnh Git là gõ chúng hàng ngày. Sử dụng đúng Git Workflow giúp team của bạn vận hành trơn tru và phát hành mã nguồn an toàn hơn trên GitHub.
                     </p>
                     <button onclick="goToSlide(0)" class="btn-nav" style="width: auto; height: auto; padding: 1.2rem 3rem; border-radius: 50px; background: var(--white); border: none; color: var(--primary); font-size: 1.5rem; font-weight: 800;">
                         Quay lại Slide 1
                     </button>
                 </div>
-                <div class="slide-counter">Slide 8 / 8</div>
+                <div class="slide-counter">Slide 7 / 7</div>
             </div>
 
         </div>
@@ -1023,7 +1015,7 @@
     <script>
         // Slide navigation
         let currentSlide = 0;
-        const totalSlides = 8;
+        const totalSlides = 7;
         const container = document.getElementById('slidesContainer');
         const btnPrev = document.getElementById('btnPrev');
         const btnNext = document.getElementById('btnNext');
@@ -1076,32 +1068,32 @@
         const nodeDetails = {
             workspace: {
                 title: "1. Workspace (Khu Vực Làm Việc Cục Bộ)",
-                desc: "Thư mục vật lý chứa mã nguồn dự án trên máy tính của bạn (nơi bạn mở VS Code để chỉnh sửa). Ở đây, các file vừa tạo hoặc vừa chỉnh sửa sẽ ở trạng thái chưa theo dõi (Untracked) hoặc đã sửa đổi (Modified).",
+                desc: "Thư mục vật lý chứa mã nguồn dự án trên máy tính của bạn (nơi bạn mở VS Code để chỉnh sửa). Ở đây, các file vừa tạo hoặc vừa chỉnh sửa sẽ ở trạng thái chưa theo dõi (Untracked) hoặc đã sửa đổi (Modified). Lệnh liên quan: <code>git status</code> (kiểm tra trạng thái file), <code>git diff</code> (xem các dòng code thay đổi).",
                 cmd: "git status"
             },
             staging: {
                 title: "2. Staging Area (Khu Vực Chờ)",
-                desc: "Khu vực lưu vết tạm thời của Git. Hoạt động như một 'giỏ hàng' để bạn lựa chọn chính xác những file/dòng code nào muốn đưa vào phiên bản sao lưu tiếp theo. Gom file vào đây bằng lệnh <code>git add</code>.",
+                desc: "Khu vực lưu vết tạm thời của Git. Hoạt động như một 'giỏ hàng' để bạn lựa chọn chính xác những file/dòng code nào muốn đưa vào phiên bản sao lưu tiếp theo. Chức năng chính: gom các thay đổi bằng lệnh <code>git add</code>.",
                 cmd: "git add ."
             },
             local: {
                 title: "3. Local Repository (Kho Chứa Trên Máy)",
-                desc: "Thư mục lưu trữ lịch sử Git cục bộ trên máy bạn (nằm trong thư mục ẩn <code>.git</code>). Khi bạn commit, Git sẽ chụp lại trạng thái ở Staging và lưu vĩnh viễn vào lịch sử phiên bản trên máy cá nhân.",
+                desc: "Thư mục lưu trữ lịch sử Git cục bộ trên máy bạn (nằm trong thư mục ẩn <code>.git</code>). Khi bạn commit, Git sẽ chụp lại trạng thái ở Staging và lưu vĩnh viễn vào lịch sử phiên bản trên máy cá nhân. Chức năng chính: lưu lịch sử bằng lệnh <code>git commit</code>.",
                 cmd: "git commit -m \"feat: implement authentication\""
             },
             remote: {
                 title: "4. GitHub / Remote Repository (Kho Đám Mây)",
-                desc: "Máy chủ lưu trữ mã nguồn chung trên internet (GitHub, GitLab, Bitbucket). Đây là nơi lưu trữ tập trung để đồng bộ code của tất cả mọi người trong nhóm. Chạy lệnh <code>git push</code> để đưa lịch sử commit từ máy lên đây.",
+                desc: "Máy chủ lưu trữ mã nguồn chung trên internet (GitHub). Đây là nơi lưu trữ tập trung để đồng bộ code của tất cả mọi người trong nhóm. Chức năng chính: đẩy code lên mạng bằng lệnh <code>git push</code>.",
                 cmd: "git push origin main"
             },
             deploy: {
                 title: "5. CI/CD Deploy (Tự Động Triển Khai)",
-                desc: "Khi code được gộp vào nhánh chính trên GitHub, hệ thống CI/CD (như GitHub Actions, GitLab CI) sẽ tự động chạy kiểm thử (Build & Test). Nếu vượt qua, code sẽ tự động được deploy trực tiếp lên máy chủ Production.",
+                desc: "Khi code được gộp vào nhánh chính trên GitHub, hệ thống CI/CD (như GitHub Actions) sẽ tự động chạy kiểm thử (Build & Test). Nếu vượt qua, code sẽ tự động được deploy trực tiếp lên máy chủ Production để người dùng sử dụng. Chức năng chính: Tự động hóa tích hợp & triển khai code.",
                 cmd: "git merge main"
             },
             sync: {
                 title: "6. Git Pull / Sync (Đồng Bộ Mã Nguồn)",
-                desc: "Lệnh lấy toàn bộ lịch sử commits mới nhất từ máy chủ GitHub về máy tính cá nhân của bạn, tự động gộp (merge) vào nhánh hiện tại để đảm bảo bạn luôn làm việc trên code mới nhất của dự án.",
+                desc: "Lấy toàn bộ lịch sử commits mới nhất từ máy chủ GitHub về máy tính cá nhân của bạn, tự động gộp (merge) vào nhánh hiện tại để đảm bảo bạn luôn làm việc trên code mới nhất của dự án. Chức năng chính: đồng bộ code bằng lệnh <code>git pull</code>.",
                 cmd: "git pull origin main"
             }
         };
