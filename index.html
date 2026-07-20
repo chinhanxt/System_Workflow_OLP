@@ -86,7 +86,7 @@
 
         /* Slide Header */
         .slide-header {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             border-bottom: 2px solid rgba(0, 102, 245, 0.08);
             padding-bottom: 1rem;
         }
@@ -124,7 +124,7 @@
         /* Layout Grids */
         .grid-2 {
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
+            grid-template-columns: 1.15fr 0.85fr;
             gap: 4rem;
             align-items: center;
         }
@@ -303,11 +303,11 @@
             background: rgba(255,255,255,0.1);
         }
 
-        /* GRAND MINDMAP (Slide 2) */
+        /* GRAND MINDMAP (Slide 2 - Isometric Circular) */
         .grand-mindmap-layout {
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: 2rem;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 2.5rem;
             width: 100%;
             height: 100%;
             max-height: 520px;
@@ -316,19 +316,20 @@
         .mindmap-viewport {
             background-color: #FFFFFF;
             border: 3px solid rgba(0, 102, 245, 0.1);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 1.5rem;
             box-shadow: var(--shadow-premium);
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
         .mindmap-explanation {
             background-color: var(--primary);
             color: var(--white);
-            border-radius: 24px;
+            border-radius: 28px;
             padding: 2.5rem;
             display: flex;
             flex-direction: column;
@@ -374,69 +375,103 @@
             display: block;
         }
 
-        /* SVG Sơ đồ tư duy hoành tráng */
+        /* SVG Sơ đồ tư duy hoành tráng - Isometric circle */
         .mindmap-svg {
             width: 100%;
             height: 100%;
-            min-height: 420px;
+            min-height: 440px;
         }
 
+        /* Flow Path Animate */
+        .ellipse-flow-path {
+            fill: none;
+            stroke: rgba(0, 102, 245, 0.15);
+            stroke-width: 4;
+            stroke-dasharray: 10 8;
+            animation: flowDash 30s linear infinite;
+        }
+
+        @keyframes flowDash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Isometric Node Group Styles */
         .node-group {
             cursor: pointer;
-        }
-
-        .node-group circle {
-            fill: var(--white);
-            stroke: var(--secondary);
-            stroke-width: 5px;
             transition: var(--transition-smooth);
-            filter: drop-shadow(0 4px 6px rgba(0, 102, 245, 0.15));
         }
 
-        .node-group:hover circle {
-            transform: scale(1.08);
-            stroke: var(--accent);
-            filter: drop-shadow(0 10px 15px rgba(0, 102, 245, 0.3));
+        .node-group polygon.face-top {
+            fill: #E9F2FF;
+            stroke: var(--secondary);
+            stroke-width: 2px;
+            transition: var(--transition-smooth);
         }
 
-        .node-group.active circle {
-            fill: var(--secondary);
-            stroke: var(--accent);
-            stroke-width: 6px;
+        .node-group polygon.face-left {
+            fill: #ADCFFF;
+            transition: var(--transition-smooth);
         }
 
-        .node-group text {
-            font-size: 16px;
+        .node-group polygon.face-right {
+            fill: #7FB5FF;
+            transition: var(--transition-smooth);
+        }
+
+        .node-group text.label-title {
+            font-size: 13px;
             font-weight: 800;
             fill: var(--primary);
+            text-anchor: middle;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: var(--transition-smooth);
+        }
+
+        .node-group text.label-sub {
+            font-size: 10px;
+            font-weight: 600;
+            fill: #627D98;
             text-anchor: middle;
             font-family: 'Outfit', sans-serif;
             transition: var(--transition-smooth);
         }
 
-        .node-group.active text {
-            fill: var(--white);
-        }
-
-        .path-flow {
-            stroke: var(--secondary);
-            stroke-width: 5px;
-            fill: none;
-            stroke-dasharray: 10 5;
-            animation: flowDash 20s linear infinite;
-        }
-
-        .path-flow.reverse {
+        /* Hover & Active States for Isometric Nodes */
+        .node-group:hover polygon.face-top,
+        .node-group.active polygon.face-top {
+            fill: var(--accent);
             stroke: var(--accent);
-            animation: flowDashReverse 20s linear infinite;
         }
 
-        @keyframes flowDash {
-            to { stroke-dashoffset: -1000; }
+        .node-group:hover polygon.face-left,
+        .node-group.active polygon.face-left {
+            fill: #00B395;
         }
 
-        @keyframes flowDashReverse {
-            to { stroke-dashoffset: 1000; }
+        .node-group:hover polygon.face-right,
+        .node-group.active polygon.face-right {
+            fill: #008F77;
+        }
+
+        .node-group:hover text.label-title,
+        .node-group.active text.label-title {
+            fill: var(--secondary);
+            font-weight: 800;
+        }
+
+        /* Center Node Spec */
+        .center-node polygon.face-top {
+            fill: #FFFFFF;
+            stroke: var(--primary);
+            stroke-width: 3px;
+        }
+        .center-node polygon.face-left {
+            fill: #D3E0EA;
+        }
+        .center-node polygon.face-right {
+            fill: #A0B2C6;
         }
 
         /* Navigation controls */
@@ -570,7 +605,7 @@
                 <div class="slide-counter">Slide 1 / 8</div>
             </div>
 
-            <!-- SLIDE 2: GRAND INTERACTIVE MINDMAP (Theme Light) -->
+            <!-- SLIDE 2: GRAND INTERACTIVE MINDMAP (Theme Light - Circular Isometric) -->
             <div class="slide">
                 <div class="slide-header">
                     <h2>Sơ Đồ Tư Duy Luồng Đi Của Code & Các Câu Lệnh</h2>
@@ -579,55 +614,134 @@
                 
                 <div class="slide-body">
                     <div class="grand-mindmap-layout">
-                        <!-- Left: Large interactive SVG Mindmap -->
+                        <!-- Left: Circular Isometric SVG Mindmap based on the provided model image -->
                         <div class="mindmap-viewport">
-                            <svg class="mindmap-svg" viewBox="0 0 650 420">
-                                <!-- Flows Lines (Local to Remote) -->
-                                <path d="M 80,110 H 260" class="path-flow" />
-                                <path d="M 260,110 H 440" class="path-flow" />
-                                <path d="M 440,110 H 570" class="path-flow" />
-                                <path d="M 570,150 H 80" class="path-flow reverse" />
-                                
-                                <!-- Node 1: Workspace -->
-                                <g class="node-group active" id="node-workspace" transform="translate(80, 110)" onclick="selectNode('workspace')">
-                                    <circle r="45" />
-                                    <text y="5">WORKSPACE</text>
+                            <svg class="mindmap-svg" viewBox="0 0 760 460">
+                                <defs>
+                                    <!-- Gradients for Central Node -->
+                                    <linearGradient id="grad-center" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#E2F0FD" />
+                                        <stop offset="100%" stop-color="#FFFFFF" />
+                                    </linearGradient>
+                                </defs>
+
+                                <!-- Circular Ellipse Path representing the clockwise flow of code -->
+                                <ellipse cx="380" cy="240" rx="220" ry="150" class="ellipse-flow-path" />
+
+                                <!-- CENTER NODE: LẬP TRÌNH VIÊN (Developer Platform) -->
+                                <g class="center-node" transform="translate(0, 0)">
+                                    <!-- 3D Platform Center -->
+                                    <polygon points="380,205 440,235 380,265 320,235" fill="url(#grad-center)" stroke="#0A2540" stroke-width="3" />
+                                    <polygon points="320,235 380,265 380,277 320,247" fill="#B1C6D9" />
+                                    <polygon points="380,265 440,235 440,247 380,277" fill="#879EB5" />
+                                    
+                                    <!-- Developer Icon/Drawing representation on center platform -->
+                                    <g transform="translate(380, 222) scale(0.85)">
+                                        <!-- Monitor / Code Editor visual -->
+                                        <rect x="-24" y="-30" width="48" height="32" rx="4" fill="#0A2540" />
+                                        <rect x="-20" y="-26" width="40" height="24" rx="2" fill="#00D4B2" />
+                                        <!-- Code lines on monitor -->
+                                        <line x1="-14" y1="-20" x2="-2" y2="-20" stroke="#0A2540" stroke-width="2" />
+                                        <line x1="-14" y1="-14" x2="6" y2="-14" stroke="#0A2540" stroke-width="2" />
+                                        <!-- Laptop stand -->
+                                        <polygon points="-8,2 -16,8 16,8 8,2" fill="#0A2540" />
+                                        <rect x="-4" y="2" width="8" height="6" fill="#879EB5" />
+                                    </g>
+                                    <text x="380" y="300" font-size="14" font-weight="800" fill="#0A2540" text-anchor="middle">LẬP TRÌNH VIÊN</text>
                                 </g>
 
-                                <!-- Node 2: Staging Area -->
-                                <g class="node-group" id="node-staging" transform="translate(260, 110)" onclick="selectNode('staging')">
-                                    <circle r="45" />
-                                    <text y="5">STAGING</text>
+                                <!-- NODE 1: WORKSPACE (Left: 160, 240) -->
+                                <g class="node-group active" id="node-workspace" onclick="selectNode('workspace')">
+                                    <polygon points="160,225 200,240 160,255 120,240" class="face-top" />
+                                    <polygon points="120,240 160,255 160,263 120,248" class="face-left" />
+                                    <polygon points="160,255 200,240 200,248 160,263" class="face-right" />
+                                    
+                                    <!-- Icon: Code block -->
+                                    <g transform="translate(160, 235) scale(0.6)">
+                                        <rect x="-20" y="-18" width="40" height="26" rx="3" fill="#0066F5" />
+                                        <rect x="-16" y="-14" width="32" height="18" rx="1" fill="#FFF" />
+                                        <line x1="-10" y1="-9" x2="-2" y2="-9" stroke="#0066F5" stroke-width="2" />
+                                        <line x1="-10" y1="-4" x2="6" y2="-4" stroke="#0066F5" stroke-width="2" />
+                                    </g>
+                                    <text x="160" y="195" class="label-title">WORKSPACE</text>
+                                    <text x="160" y="210" class="label-sub">Mã nguồn gốc</text>
                                 </g>
 
-                                <!-- Node 3: Local Repo -->
-                                <g class="node-group" id="node-local" transform="translate(440, 110)" onclick="selectNode('local')">
-                                    <circle r="45" />
-                                    <text y="5">LOCAL REPO</text>
+                                <!-- NODE 2: STAGING (Top-Left: 270, 110) -->
+                                <g class="node-group" id="node-staging" onclick="selectNode('staging')">
+                                    <polygon points="270,95 310,110 270,125 230,110" class="face-top" />
+                                    <polygon points="230,110 270,125 270,133 230,118" class="face-left" />
+                                    <polygon points="270,125 310,110 310,118 270,133" class="face-right" />
+                                    
+                                    <!-- Icon: Index Box -->
+                                    <g transform="translate(270, 105) scale(0.6)">
+                                        <path d="M-15,-10 L0,-18 L15,-10 L15,10 L0,18 L-15,10 Z" fill="#0066F5" />
+                                        <path d="M-15,-10 L0,0 L15,-10" fill="none" stroke="#FFF" stroke-width="2" />
+                                        <line x1="0" y1="0" x2="0" y2="18" stroke="#FFF" stroke-width="2" />
+                                    </g>
+                                    <text x="270" y="65" class="label-title">STAGING</text>
+                                    <text x="270" y="80" class="label-sub">Chuẩn bị lưu</text>
                                 </g>
 
-                                <!-- Node 4: Remote GitHub -->
-                                <g class="node-group" id="node-remote" transform="translate(570, 150)" onclick="selectNode('remote')">
-                                    <circle r="45" />
-                                    <text y="5">GITHUB</text>
+                                <!-- NODE 3: LOCAL REPO (Top-Right: 490, 110) -->
+                                <g class="node-group" id="node-local" onclick="selectNode('local')">
+                                    <polygon points="490,95 530,110 490,125 450,110" class="face-top" />
+                                    <polygon points="450,110 490,125 490,133 450,118" class="face-left" />
+                                    <polygon points="490,125 530,110 530,118 490,133" class="face-right" />
+                                    
+                                    <!-- Icon: Database Safe -->
+                                    <g transform="translate(490, 105) scale(0.6)">
+                                        <rect x="-16" y="-16" width="32" height="32" rx="4" fill="#0066F5" />
+                                        <circle cx="-6" cy="0" r="3" fill="#FFF" />
+                                        <line x1="0" y1="0" x2="10" y2="0" stroke="#FFF" stroke-width="3" />
+                                    </g>
+                                    <text x="490" y="65" class="label-title">LOCAL REPO</text>
+                                    <text x="490" y="80" class="label-sub">Lưu trữ trên máy</text>
                                 </g>
 
-                                <!-- Command flow buttons in SVG -->
-                                <g transform="translate(170, 75)" style="cursor: pointer;" onclick="selectNode('staging')">
-                                    <rect x="-40" y="-12" width="80" height="24" rx="12" fill="#0066F5"/>
-                                    <text fill="white" font-size="11" font-weight="bold" x="0" y="4" text-anchor="middle">git add</text>
+                                <!-- NODE 4: GITHUB (Right: 600, 240) -->
+                                <g class="node-group" id="node-remote" onclick="selectNode('remote')">
+                                    <polygon points="600,225 640,240 600,255 560,240" class="face-top" />
+                                    <polygon points="560,240 600,255 600,263 560,248" class="face-left" />
+                                    <polygon points="600,255 640,240 640,248 600,263" class="face-right" />
+                                    
+                                    <!-- Icon: Cloud -->
+                                    <g transform="translate(600, 235) scale(0.6)">
+                                        <path d="M-12,8 A8,8 0 0,1 -10,-8 A12,12 0 0,1 10,-8 A10,10 0 0,1 12,8 Z" fill="#0066F5" />
+                                    </g>
+                                    <text x="600" y="195" class="label-title">GITHUB</text>
+                                    <text x="600" y="210" class="label-sub">Đám mây máy chủ</text>
                                 </g>
-                                <g transform="translate(350, 75)" style="cursor: pointer;" onclick="selectNode('local')">
-                                    <rect x="-45" y="-12" width="90" height="24" rx="12" fill="#0066F5"/>
-                                    <text fill="white" font-size="11" font-weight="bold" x="0" y="4" text-anchor="middle">git commit</text>
+
+                                <!-- NODE 5: CI/CD DEPLOY (Bottom-Right: 490, 370) -->
+                                <g class="node-group" id="node-deploy" onclick="selectNode('deploy')">
+                                    <polygon points="490,355 530,370 490,385 450,370" class="face-top" />
+                                    <polygon points="450,370 490,385 490,393 450,378" class="face-left" />
+                                    <polygon points="490,385 530,370 530,378 490,393" class="face-right" />
+                                    
+                                    <!-- Icon: Rocket -->
+                                    <g transform="translate(490, 365) scale(0.55)">
+                                        <path d="M0,-20 C5,-10 10,-5 10,10 L-10,10 C-10,-5 -5,-10 0,-20 Z" fill="#0066F5" />
+                                        <path d="M-10,10 L-15,18 L-5,15 L-10,10 Z" fill="#FF5F56" />
+                                        <path d="M10,10 L15,18 L5,15 L10,10 Z" fill="#FF5F56" />
+                                    </g>
+                                    <text x="490" y="415" class="label-title">CI/CD DEPLOY</text>
+                                    <text x="490" y="430" class="label-sub">Tự động triển khai</text>
                                 </g>
-                                <g transform="translate(520, 75)" style="cursor: pointer;" onclick="selectNode('remote')">
-                                    <rect x="-40" y="-12" width="80" height="24" rx="12" fill="#0066F5"/>
-                                    <text fill="white" font-size="11" font-weight="bold" x="0" y="4" text-anchor="middle">git push</text>
-                                </g>
-                                <g transform="translate(325, 200)" style="cursor: pointer;" onclick="selectNode('workspace')">
-                                    <rect x="-40" y="-12" width="80" height="24" rx="12" fill="#00D4B2"/>
-                                    <text fill="#0A2540" font-size="11" font-weight="bold" x="0" y="4" text-anchor="middle">git pull</text>
+
+                                <!-- NODE 6: GIT PULL / SYNC (Bottom-Left: 270, 370) -->
+                                <g class="node-group" id="node-sync" onclick="selectNode('sync')">
+                                    <polygon points="270,355 310,370 270,385 230,370" class="face-top" />
+                                    <polygon points="230,370 270,385 270,393 230,378" class="face-left" />
+                                    <polygon points="270,385 310,370 310,378 270,393" class="face-right" />
+                                    
+                                    <!-- Icon: Sync arrows -->
+                                    <g transform="translate(270, 365) scale(0.6)">
+                                        <path d="M-10,-5 A10,10 0 1,1 -5,8" fill="none" stroke="#0066F5" stroke-width="4" stroke-linecap="round" />
+                                        <polygon points="-12,-8 -4,-8 -8,-2" fill="#0066F5" />
+                                    </g>
+                                    <text x="270" y="415" class="label-title">GIT PULL / SYNC</text>
+                                    <text x="270" y="430" class="label-sub">Đồng bộ code mới</text>
                                 </g>
                             </svg>
                         </div>
@@ -636,7 +750,7 @@
                         <div class="mindmap-explanation">
                             <div>
                                 <h3 id="ex-title">1. Workspace</h3>
-                                <p id="ex-desc">Nơi chỉnh sửa mã nguồn gốc trực tiếp của bạn trên ổ đĩa máy tính. Mọi thay đổi ở đây chưa được Git lưu vết chính thức.</p>
+                                <p id="ex-desc">Thư mục vật lý trên ổ cứng của bạn. Đây là nơi bạn mở VS Code lên, tạo/sửa file trực tiếp. Mọi thay đổi ở đây chưa được Git lưu vết chính thức.</p>
                             </div>
                             <div class="console-run">
                                 <div class="console-run-title">CÂU LỆNH LIÊN QUAN</div>
@@ -953,24 +1067,34 @@
         // Interactive Mindmap details
         const nodeDetails = {
             workspace: {
-                title: "1. Workspace (Khu Vực Làm Việc)",
-                desc: "Thư mục vật lý trên ổ cứng của bạn. Đây là nơi bạn mở VS Code lên, tạo/sửa file trực tiếp. Git có biết những thay đổi này nhưng ở trạng thái 'Chưa Theo Dõi' (Untracked) hoặc 'Chưa Sắp Xếp' (Modified).",
+                title: "1. Workspace (Khu Vực Làm Việc Cục Bộ)",
+                desc: "Thư mục vật lý chứa mã nguồn dự án trên máy tính của bạn (nơi bạn mở VS Code để chỉnh sửa). Ở đây, các file vừa tạo hoặc vừa chỉnh sửa sẽ ở trạng thái chưa theo dõi (Untracked) hoặc đã sửa đổi (Modified).",
                 cmd: "git status"
             },
             staging: {
-                title: "2. Staging Area (Khu Vực Chờ Commit)",
-                desc: "Khu vực lưu vết tạm thời. Nó hoạt động như một 'giỏ hàng' gom các thay đổi bạn thực sự muốn lưu lại. Bạn có thể thêm file chọn lọc bằng <code>git add filepath</code> hoặc gom tất cả bằng <code>git add .</code>.",
+                title: "2. Staging Area (Khu Vực Chờ)",
+                desc: "Khu vực lưu vết tạm thời của Git. Hoạt động như một 'giỏ hàng' để bạn lựa chọn chính xác những file/dòng code nào muốn đưa vào phiên bản sao lưu tiếp theo. Gom file vào đây bằng lệnh <code>git add</code>.",
                 cmd: "git add ."
             },
             local: {
-                title: "3. Local Repository (Kho Chứa Cục Bộ)",
-                desc: "Kho chứa Git ngay trên máy tính của bạn (nằm trong thư mục ẩn <code>.git</code>). Khi bạn commit, Git chụp lại ảnh chụp snapshot của Staging và lưu vĩnh viễn vào lịch sử phiên bản cục bộ.",
-                cmd: "git commit -m \"feat: implement auth\""
+                title: "3. Local Repository (Kho Chứa Trên Máy)",
+                desc: "Thư mục lưu trữ lịch sử Git cục bộ trên máy bạn (nằm trong thư mục ẩn <code>.git</code>). Khi bạn commit, Git sẽ chụp lại trạng thái ở Staging và lưu vĩnh viễn vào lịch sử phiên bản trên máy cá nhân.",
+                cmd: "git commit -m \"feat: implement authentication\""
             },
             remote: {
-                title: "4. Remote Repository (GitHub/GitLab)",
-                desc: "Máy chủ lưu trữ mã nguồn chung trên Internet. Dùng để chia sẻ, đồng bộ code giữa các lập trình viên trong dự án. Để đẩy code lên, bạn chạy lệnh <code>git push</code>. Để lấy code mới về máy, chạy lệnh <code>git pull</code>.",
+                title: "4. GitHub / Remote Repository (Kho Đám Mây)",
+                desc: "Máy chủ lưu trữ mã nguồn chung trên internet (GitHub, GitLab, Bitbucket). Đây là nơi lưu trữ tập trung để đồng bộ code của tất cả mọi người trong nhóm. Chạy lệnh <code>git push</code> để đưa lịch sử commit từ máy lên đây.",
                 cmd: "git push origin main"
+            },
+            deploy: {
+                title: "5. CI/CD Deploy (Tự Động Triển Khai)",
+                desc: "Khi code được gộp vào nhánh chính trên GitHub, hệ thống CI/CD (như GitHub Actions, GitLab CI) sẽ tự động chạy kiểm thử (Build & Test). Nếu vượt qua, code sẽ tự động được deploy trực tiếp lên máy chủ Production.",
+                cmd: "git merge main"
+            },
+            sync: {
+                title: "6. Git Pull / Sync (Đồng Bộ Mã Nguồn)",
+                desc: "Lệnh lấy toàn bộ lịch sử commits mới nhất từ máy chủ GitHub về máy tính cá nhân của bạn, tự động gộp (merge) vào nhánh hiện tại để đảm bảo bạn luôn làm việc trên code mới nhất của dự án.",
+                cmd: "git pull origin main"
             }
         };
 
