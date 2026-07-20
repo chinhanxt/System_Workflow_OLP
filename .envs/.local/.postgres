@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=edu_ecosystem
+POSTGRES_USER=cTZRVHSRtlaQwgJQkvzhOnFbISRssptb
+POSTGRES_PASSWORD=jLEesRzkjaywlijNiRKfY3zcBQCjXFTY9vvgB34iV78uHau98XcdReLubowUReDU

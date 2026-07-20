@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* sonner toast: allow multi-line messages */
+[data-sonner-toast] [data-title] {
+  white-space: pre-line;
+}
