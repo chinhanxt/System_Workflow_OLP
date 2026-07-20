@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -20,7 +21,11 @@ class DocumentChunkViewSet(viewsets.ModelViewSet):
 
     queryset = DocumentChunk.objects.all().order_by("-created_at")
     serializer_class = DocumentChunkSerializer
-    permission_classes = [AllowAny]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
 
 class WorkflowViewSet(viewsets.ModelViewSet):
@@ -40,6 +45,11 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], url_path="run")
     def run_workflow(self, request, pk=None):
         workflow = self.get_object()
+        if not workflow.is_active:
+            return Response(
+                {"detail": "Workflow is inactive."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         state_data = request.data.get("state_data", {})
         run = WorkflowRun.objects.create(workflow=workflow, state_data=state_data)
         run_workflow_task.delay(str(run.id))
@@ -47,12 +57,15 @@ class WorkflowViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(
-        detail=True, methods=["get"], url_path="form", permission_classes=[AllowAny]
+        detail=True,
+        methods=["get"],
+        url_path="form",
+        permission_classes=[AllowAny],
     )
     def get_form_config(self, request, pk=None):
         workflow = self.get_object()
         fields = []
-        for nid, nconf in workflow.nodes.items():
+        for nconf in workflow.nodes.values():
             if nconf.get("type") == "form_builder":
                 fields = nconf.get("fields", [])
                 break
@@ -73,6 +86,11 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     )
     def submit_form(self, request, pk=None):
         workflow = self.get_object()
+        if not workflow.is_active:
+            return Response(
+                {"detail": "Workflow is inactive."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         form_node_id = "form_builder"
         for nid, nconf in workflow.nodes.items():
             if nconf.get("type") == "form_builder":
@@ -105,7 +123,8 @@ class WorkflowRunViewSet(viewsets.ReadOnlyModelViewSet):
 
     def _handle_callback(self, run, decision):
         # We need to find the node_id of the approval node currently pending approval.
-        # We look for a NodeRunLog for this workflow run of type "approval" with status "running".
+        # We look for a NodeRunLog for this workflow run of type "approval"
+        # with status "running".
         active_log = (
             NodeRunLog.objects.filter(
                 workflow_run=run,
@@ -119,6 +138,10 @@ class WorkflowRunViewSet(viewsets.ReadOnlyModelViewSet):
         approval_node_id = None
         if active_log:
             approval_node_id = active_log.node_id
+            active_log.status = NodeRunLog.Status.SUCCESS
+            active_log.output_data = {"decision": decision}
+            active_log.finished_at = timezone.now()
+            active_log.save()
         else:
             # Fallback: look at run.workflow.nodes to find the approval node ID
             for nid, nconf in run.workflow.nodes.items():

@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.users.tests.factories import UserFactory
+from apps.workflows.models import DocumentChunk
 from apps.workflows.models import NodeRunLog
 from apps.workflows.models import Workflow
 from apps.workflows.models import WorkflowRun
@@ -36,7 +37,7 @@ class TestWorkflowAPI:
         url = reverse("api:workflow-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 2
+        assert len(response.data["results"]) == 2  # noqa: PLR2004
 
     def test_workflow_create_authenticated(self):
         """Verify authenticated user can create a workflow (201)."""
@@ -90,8 +91,8 @@ class TestWorkflowAPI:
         n1_log = NodeRunLog.objects.get(workflow_run=run, node_id="n1")
         assert n1_log.status == NodeRunLog.Status.RUNNING
 
-        # In view, approval callback expects a pending log status, let's set it
-        n1_log.status = "pending"
+        # In view, approval callback expects a running log status, let's set it
+        n1_log.status = NodeRunLog.Status.RUNNING
         n1_log.save()
 
         # Approve run
@@ -102,6 +103,13 @@ class TestWorkflowAPI:
 
         run.refresh_from_db()
         assert run.state_data["n1"] == {"decision": "approved"}
+        assert run.status == WorkflowRun.Status.SUCCESS
+
+        # Verify active_log is marked as SUCCESS and output updated
+        n1_log.refresh_from_db()
+        assert n1_log.status == NodeRunLog.Status.SUCCESS
+        assert n1_log.output_data == {"decision": "approved"}
+        assert n1_log.finished_at is not None
 
     def test_public_form_endpoints(self):
         """Verify unauthenticated access to form configs and form submission works."""
@@ -114,7 +122,7 @@ class TestWorkflowAPI:
                         {"name": "full_name", "type": "text", "label": "Full name"},
                         {"name": "amount", "type": "number", "label": "Amount"},
                     ],
-                }
+                },
             },
             edges=[],
         )
@@ -124,7 +132,7 @@ class TestWorkflowAPI:
         response = self.client.get(form_url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data["workflow_name"] == "Public Submission Workflow"
-        assert len(response.data["fields"]) == 2
+        assert len(response.data["fields"]) == 2  # noqa: PLR2004
 
         # POST submission (unauthenticated)
         submit_url = reverse("api:workflow-submit-form", kwargs={"pk": workflow.id})
@@ -147,8 +155,6 @@ class TestWorkflowAPI:
         url = reverse("api:workflow-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        # Two created in this test, plus any existing
-        count_all = len(response.data["results"])
 
         # Filter by Project X
         response = self.client.get(url, {"project_name": "Project X"})
@@ -158,7 +164,6 @@ class TestWorkflowAPI:
 
     def test_document_chunks_api(self):
         """Verify unauthenticated access to DocumentChunk API endpoints (AllowAny)."""
-        from apps.workflows.models import DocumentChunk
 
         DocumentChunk.objects.create(document_name="Doc 1", text_content="Content 1")
         DocumentChunk.objects.create(document_name="Doc 2", text_content="Content 2")
@@ -166,7 +171,60 @@ class TestWorkflowAPI:
         url = reverse("api:documentchunk-list")
         response = self.client.get(url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data["results"]) == 2
+        assert len(response.data["results"]) == 2  # noqa: PLR2004
         # Ordered by descending created_at
         assert response.data["results"][0]["document_name"] == "Doc 2"
         assert response.data["results"][1]["document_name"] == "Doc 1"
+
+    def test_document_chunks_write_unauthenticated_blocked(self):
+        """Verify write operations to DocumentChunk API endpoints require auth."""
+        # Unauthenticated client
+        url = reverse("api:documentchunk-list")
+        data = {"document_name": "Doc 3", "text_content": "Content 3"}
+        response = self.client.post(url, data, format="json")
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+        # Create one to test detail write endpoints
+
+        chunk = DocumentChunk.objects.create(
+            document_name="Doc 1",
+            text_content="Content 1",
+        )
+        detail_url = reverse("api:documentchunk-detail", kwargs={"pk": chunk.id})
+
+        response = self.client.put(
+            detail_url,
+            {"document_name": "Updated"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+        response = self.client.delete(detail_url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_workflow_run_and_submit_form_inactive_blocked(self):
+        """Verify inactive workflows cannot be run or submitted to."""
+        self.client.force_authenticate(user=self.user)
+        workflow = Workflow.objects.create(
+            name="Inactive Workflow",
+            is_active=False,
+            nodes={
+                "form_1": {
+                    "type": "form_builder",
+                    "fields": [],
+                },
+            },
+            edges=[],
+        )
+
+        # Trigger run on inactive workflow
+        run_url = reverse("api:workflow-run-workflow", kwargs={"pk": workflow.id})
+        response = self.client.post(run_url, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["detail"] == "Workflow is inactive."
+
+        # Submit form to inactive workflow
+        submit_url = reverse("api:workflow-submit-form", kwargs={"pk": workflow.id})
+        response = self.client.post(submit_url, {}, format="json")
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.data["detail"] == "Workflow is inactive."

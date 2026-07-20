@@ -6,11 +6,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.users.api.views import AuthViewSet
 from apps.users.api.views import UserViewSet
-from apps.workflows.api.views import (
-    DocumentChunkViewSet,
-    WorkflowRunViewSet,
-    WorkflowViewSet,
-)
+from apps.workflows.api.views import DocumentChunkViewSet
+from apps.workflows.api.views import WorkflowRunViewSet
+from apps.workflows.api.views import WorkflowViewSet
 
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")
