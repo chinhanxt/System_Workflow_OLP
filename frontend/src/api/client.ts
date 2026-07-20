@@ -11,24 +11,27 @@ const apiClient = axios.create({
 
 // Attach JWT access token on every request.
 apiClient.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
+  const isInternal = !config.url?.startsWith('http') || config.url.startsWith(BASE_URL)
+  if (isInternal) {
+    const token = useAuthStore.getState().accessToken
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
 
-  const geminiKey = localStorage.getItem('GEMINI_API_KEY')
-  if (geminiKey) {
-    config.headers['X-Gemini-API-Key'] = geminiKey
-  }
+    const geminiKey = localStorage.getItem('GEMINI_API_KEY')
+    if (geminiKey) {
+      config.headers['X-Gemini-API-Key'] = geminiKey
+    }
 
-  const openaiKey = localStorage.getItem('OPENAI_API_KEY')
-  if (openaiKey) {
-    config.headers['X-OpenAI-API-Key'] = openaiKey
-  }
+    const openaiKey = localStorage.getItem('OPENAI_API_KEY')
+    if (openaiKey) {
+      config.headers['X-OpenAI-API-Key'] = openaiKey
+    }
 
-  const telegramToken = localStorage.getItem('TELEGRAM_BOT_TOKEN')
-  if (telegramToken) {
-    config.headers['X-Telegram-Bot-Token'] = telegramToken
+    const telegramToken = localStorage.getItem('TELEGRAM_BOT_TOKEN')
+    if (telegramToken) {
+      config.headers['X-Telegram-Bot-Token'] = telegramToken
+    }
   }
 
   return config
