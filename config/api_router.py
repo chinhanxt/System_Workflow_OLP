@@ -33,15 +33,5 @@ app_name = "api"
 
 urlpatterns = [
     path("v1/auth/", include((auth_urlpatterns, "auth"))),
-    path(
-        "v1/workflows/runs/<uuid:pk>/approve/",
-        WorkflowRunViewSet.as_view({"post": "approve", "get": "approve"}),
-        name="workflows-run-approve",
-    ),
-    path(
-        "v1/workflows/runs/<uuid:pk>/reject/",
-        WorkflowRunViewSet.as_view({"post": "reject", "get": "reject"}),
-        name="workflows-run-reject",
-    ),
     path("v1/", include(router.urls)),
 ]
