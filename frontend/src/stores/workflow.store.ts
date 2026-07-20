@@ -27,7 +27,12 @@ interface WorkflowState {
   workflowRuns: WorkflowRun[]
   isLoading: boolean
   error: string | null
+  activeProject: string
+  projects: string[]
 
+  setActiveProject: (project: string) => void
+  addProject: (project: string) => void
+  loadProjectsFromStorage: () => void
   fetchWorkflows: () => Promise<void>
   fetchWorkflow: (id: string) => Promise<Workflow>
   createWorkflow: (data: Partial<Workflow>) => Promise<Workflow>
@@ -39,17 +44,58 @@ interface WorkflowState {
   rejectWorkflowRun: (runId: string) => Promise<WorkflowRun>
 }
 
-export const useWorkflowStore = create<WorkflowState>((set) => ({
+export const useWorkflowStore = create<WorkflowState>((set, get) => ({
   workflows: [],
   activeWorkflow: null,
   workflowRuns: [],
   isLoading: false,
   error: null,
+  activeProject: 'Default Project',
+  projects: ['Default Project'],
+
+  setActiveProject: (project: string) => {
+    localStorage.setItem('active_project_name', project)
+    set({ activeProject: project })
+  },
+
+  addProject: (project: string) => {
+    set((state) => {
+      if (state.projects.includes(project)) return state
+      const updatedProjects = [...state.projects, project]
+      localStorage.setItem('dx_os_projects_list', JSON.stringify(updatedProjects))
+      return { projects: updatedProjects }
+    })
+  },
+
+  loadProjectsFromStorage: () => {
+    const storedActive = localStorage.getItem('active_project_name')
+    const storedProjects = localStorage.getItem('dx_os_projects_list')
+
+    const activeProject = storedActive || 'Default Project'
+    let projects = ['Default Project']
+    if (storedProjects) {
+      try {
+        const parsed = JSON.parse(storedProjects)
+        if (Array.isArray(parsed)) {
+          projects = parsed
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+    }
+
+    if (!projects.includes(activeProject)) {
+      projects.push(activeProject)
+    }
+
+    set({ activeProject, projects })
+  },
 
   fetchWorkflows: async () => {
     set({ isLoading: true, error: null })
     try {
-      const response = await apiClient.get('/workflows/')
+      const activeProjectName = get().activeProject
+      const response = await apiClient.get(`/workflows/?project_name=${encodeURIComponent(activeProjectName)}`)
       // Django standard pagination has results list inside response.data.results or response.data
       const data = response.data.results !== undefined ? response.data.results : response.data
       set({ workflows: data, isLoading: false })
@@ -73,7 +119,8 @@ export const useWorkflowStore = create<WorkflowState>((set) => ({
   createWorkflow: async (data: Partial<Workflow>) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await apiClient.post('/workflows/', data)
+      const activeProjectName = get().activeProject
+      const response = await apiClient.post('/workflows/', { ...data, project_name: activeProjectName })
       const newWorkflow = response.data
       set((state) => ({
         workflows: [newWorkflow, ...state.workflows],

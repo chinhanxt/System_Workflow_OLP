@@ -47,7 +47,9 @@ export function WorkflowsListPage() {
     createWorkflow, 
     deleteWorkflow, 
     triggerWorkflowRun,
-    isLoading 
+    isLoading,
+    activeProject,
+    loadProjectsFromStorage
   } = useWorkflowStore()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -55,8 +57,12 @@ export function WorkflowsListPage() {
   const [newDesc, setNewDesc] = useState('')
 
   useEffect(() => {
+    loadProjectsFromStorage()
+  }, [loadProjectsFromStorage])
+
+  useEffect(() => {
     fetchWorkflows()
-  }, [fetchWorkflows])
+  }, [fetchWorkflows, activeProject])
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
