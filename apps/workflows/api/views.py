@@ -1,3 +1,6 @@
+import logging
+
+import requests
 from django.utils import timezone
 from rest_framework import status
 from rest_framework import viewsets
@@ -14,6 +17,8 @@ from apps.workflows.models import NodeRunLog
 from apps.workflows.models import Workflow
 from apps.workflows.models import WorkflowRun
 from apps.workflows.tasks import run_workflow_task
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentChunkViewSet(viewsets.ModelViewSet):
@@ -36,7 +41,6 @@ class DocumentChunkViewSet(viewsets.ModelViewSet):
                 chunk.save()
             else:
                 try:
-                    import requests
                     url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={api_key}"
                     payload = {
                         "model": "models/text-embedding-004",
@@ -49,8 +53,8 @@ class DocumentChunkViewSet(viewsets.ModelViewSet):
                     data = response.json()
                     chunk.embedding = data["embedding"]["values"]
                     chunk.save()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.exception("Error generating Gemini embedding for DocumentChunk %s: %s", chunk.id, e)
 
 
 
@@ -99,7 +103,7 @@ class WorkflowViewSet(viewsets.ModelViewSet):
     def get_form_config(self, request, pk=None):
         workflow = self.get_object()
         fields = []
-        for nconf in workflow.nodes.values():
+        for nconf in (workflow.nodes or {}).values():
             if nconf.get("type") == "form_builder":
                 fields = nconf.get("fields", [])
                 break
@@ -126,7 +130,7 @@ class WorkflowViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         form_node_id = "form_builder"
-        for nid, nconf in workflow.nodes.items():
+        for nid, nconf in (workflow.nodes or {}).items():
             if nconf.get("type") == "form_builder":
                 form_node_id = nid
                 break
@@ -183,7 +187,7 @@ class WorkflowRunViewSet(viewsets.ReadOnlyModelViewSet):
             active_log.save()
         else:
             # Fallback: look at run.workflow.nodes to find the approval node ID
-            for nid, nconf in run.workflow.nodes.items():
+            for nid, nconf in (run.workflow.nodes or {}).items():
                 if nconf.get("type") == "approval":
                     approval_node_id = nid
                     break
