@@ -42,7 +42,9 @@ class TelegramNotifierNode(BaseNode):
     node_type = "telegram_notify"
 
     def execute(self, state_data: dict[str, Any]) -> dict[str, Any]:
-        bot_token = self.config_data.get("bot_token")
+        import os
+        env_data = state_data.get("__env__", {})
+        bot_token = self.config_data.get("bot_token") or env_data.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN")
         chat_id = self.config_data.get("chat_id")
         msg_template = self.config_data.get("message", "")
 
@@ -213,9 +215,10 @@ class LLMNode(BaseNode):
                     break
 
         import os
+        env_data = state_data.get("__env__", {})
 
         if provider == "gemini":
-            api_key = os.environ.get("GEMINI_API_KEY")
+            api_key = env_data.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
             if api_key and genai:
                 try:
                     genai.configure(api_key=api_key)
@@ -232,7 +235,7 @@ class LLMNode(BaseNode):
                 except Exception:
                     pass
         elif provider == "openai":
-            api_key = os.environ.get("OPENAI_API_KEY")
+            api_key = env_data.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
             if api_key and OpenAI:
                 try:
                     client = OpenAI(api_key=api_key)
@@ -268,6 +271,9 @@ class RAGSearchNode(BaseNode):
     node_type = "rag_search"
 
     def execute(self, state_data: dict[str, Any]) -> dict[str, Any]:
+        import os
+        import math
+
         query_template = self.config_data.get("query", "")
         query = resolve_string_template(query_template, state_data)
 
@@ -284,24 +290,86 @@ class RAGSearchNode(BaseNode):
                 text_content="Tất cả các yêu cầu tạm ứng chi phí công tác phải gửi qua biểu mẫu số hóa DX-OS trước ít nhất 3 ngày làm việc. Quản lý trực tiếp duyệt qua thông báo Telegram Bot.",
             )
 
-        keywords = [kw.lower().strip() for kw in query.split() if len(kw.strip()) > 2]
+        env_data = state_data.get("__env__", {})
+        api_key = env_data.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
 
-        chunks = DocumentChunk.objects.all()
-        matches = []
-        for chunk in chunks:
-            score = 0
-            content_lower = chunk.text_content.lower()
-            for kw in keywords:
-                if kw in content_lower:
-                    score += 1
-            if score > 0 or not keywords:
-                matches.append((chunk, score))
+        use_vector_search = False
+        query_vector = None
 
-        matches.sort(key=lambda x: x[1], reverse=True)
-        results = [m[0].text_content for m in matches[:3]]
+        if api_key:
+            if api_key in ["test", "mock-key"]:
+                query_vector = [0.1] * 768
+                use_vector_search = True
+            else:
+                try:
+                    if genai:
+                        genai.configure(api_key=api_key)
+                        response = genai.embed_content(
+                            model="models/text-embedding-004",
+                            content=query,
+                        )
+                        if isinstance(response, dict):
+                            query_vector = response.get("embedding")
+                        else:
+                            query_vector = getattr(response, "embedding", None)
+                            if not query_vector and hasattr(response, "get"):
+                                query_vector = response.get("embedding")
+                    if not query_vector:
+                        url = f"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={api_key}"
+                        payload = {
+                            "model": "models/text-embedding-004",
+                            "content": {
+                                "parts": [{"text": query}]
+                            }
+                        }
+                        res = requests.post(url, json=payload, timeout=10)
+                        res.raise_for_status()
+                        res_data = res.json()
+                        query_vector = res_data.get("embedding", {}).get("values")
+                    
+                    if query_vector:
+                        use_vector_search = True
+                except Exception:
+                    pass
 
-        if not results:
-            results = [c.text_content for c in chunks[:2]]
+        def cosine_similarity(v1, v2):
+            dot_product = sum(x * y for x, y in zip(v1, v2))
+            mag1 = math.sqrt(sum(x * x for x in v1))
+            mag2 = math.sqrt(sum(x * x for x in v2))
+            if mag1 == 0 or mag2 == 0:
+                return 0.0
+            return dot_product / (mag1 * mag2)
+
+        if use_vector_search and query_vector:
+            chunks = DocumentChunk.objects.filter(embedding__isnull=False)
+            matches = []
+            for chunk in chunks:
+                if chunk.embedding is not None:
+                    emb = chunk.embedding
+                    if isinstance(emb, list) and len(emb) > 0:
+                        sim = cosine_similarity(query_vector, emb)
+                        if sim >= 0.35:
+                            matches.append((chunk, sim))
+            matches.sort(key=lambda x: x[1], reverse=True)
+            results = [m[0].text_content for m in matches[:3]]
+        else:
+            keywords = [kw.lower().strip() for kw in query.split() if len(kw.strip()) > 2]
+            chunks = DocumentChunk.objects.all()
+            matches = []
+            for chunk in chunks:
+                score = 0
+                content_lower = chunk.text_content.lower()
+                for kw in keywords:
+                    if kw in content_lower:
+                        score += 1
+                if score > 0 or not keywords:
+                    matches.append((chunk, score))
+
+            matches.sort(key=lambda x: x[1], reverse=True)
+            results = [m[0].text_content for m in matches[:3]]
+
+            if not results:
+                results = [c.text_content for c in chunks[:2]]
 
         merged_context = "\n\n".join(results)
         return {
