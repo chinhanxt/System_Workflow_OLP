@@ -15,6 +15,22 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+
+  const geminiKey = localStorage.getItem('GEMINI_API_KEY')
+  if (geminiKey) {
+    config.headers['X-Gemini-API-Key'] = geminiKey
+  }
+
+  const openaiKey = localStorage.getItem('OPENAI_API_KEY')
+  if (openaiKey) {
+    config.headers['X-OpenAI-API-Key'] = openaiKey
+  }
+
+  const telegramToken = localStorage.getItem('TELEGRAM_BOT_TOKEN')
+  if (telegramToken) {
+    config.headers['X-Telegram-Bot-Token'] = telegramToken
+  }
+
   return config
 })
 
