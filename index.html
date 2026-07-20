@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Workflow Chuẩn Thực Tế - Hướng Dẫn Chi Tiết</title>
+    <!-- Google Fonts: Outfit & Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0A2540;      /* Deep Navy Blue */
+            --secondary: #0066F5;    /* Royal Blue */
+            --accent: #00D4B2;       /* Teal/Aqua Accent */
+            --bg-light: #F4F7FC;     /* Light grayish blue background */
+            --text-dark: #0A2540;    /* Text primary color */
+            --text-muted: #627D98;   /* Text secondary color */
+            --white: #FFFFFF;
+            --slide-width: 100vw;
+            --slide-height: 100vh;
+            --shadow-premium: 0 20px 40px rgba(10, 37, 64, 0.08);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--primary);
+            color: var(--text-dark);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Presentation Container */
+        .presentation {
+            width: var(--slide-width);
+            height: var(--slide-height);
+            position: relative;
+            background-color: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Slides Wrapper */
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        /* Base Slide Styles */
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            padding: 4rem 6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: var(--white);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* Slide Themes */
+        .slide.theme-dark {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .slide.theme-dark .slide-header h2 {
+            color: var(--white);
+        }
+
+        .slide.theme-dark .slide-header p {
+            color: var(--accent);
+        }
+
+        /* Navigation Controls */
+        .controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 4rem;
+            display: flex;
+            gap: 1.5rem;
+            z-index: 100;
+        }
+
+        .btn-nav {
+            background: var(--white);
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 102, 245, 0.1);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-nav:hover {
+            background: var(--secondary);
+            color: var(--white);
+            transform: scale(1.1);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+        }
+
+        .btn-nav:disabled:hover {
+            transform: none;
+            background: var(--white);
+            color: var(--text-muted);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(0, 102, 245, 0.1);
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Indicators */
+        .slide-counter {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 6rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            z-index: 100;
+        }
+
+        .slide.theme-dark .slide-counter {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Slide Header & Structure */
+        .slide-header {
+            margin-bottom: 2rem;
+        }
+
+        .slide-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slide-header p {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .slide-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .grid-2-equal {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        /* Typography & Custom classes for Slide Font size 30px+ */
+        .text-huge {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .text-large {
+            font-size: 2rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+
+        .slide.theme-dark .text-large {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .slide.theme-dark .text-muted-dark {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .badge {
+            background-color: rgba(0, 102, 245, 0.1);
+            color: var(--secondary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .badge-dark {
+            background-color: rgba(0, 212, 178, 0.2);
+            color: var(--accent);
+        }
+
+        /* List Styling (Min size 30px) */
+        ul.list-presentation, ol.list-presentation {
+            list-style: none;
+        }
+
+        ul.list-presentation li, ol.list-presentation li {
+            font-size: 1.8rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 2.5rem;
+            color: var(--text-dark);
+        }
+
+        .slide.theme-dark ul.list-presentation li {
+            color: var(--white);
+        }
+
+        ul.list-presentation li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .slide.theme-dark ul.list-presentation li::before {
+            color: var(--accent);
+        }
+
+        ol.list-presentation {
+            counter-reset: my-counter;
+        }
+
+        ol.list-presentation li::before {
+            counter-increment: my-counter;
+            content: counter(my-counter) ".";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: 800;
+        }
+
+        /* Terminal & Code Block */
+        .terminal-block {
+            background-color: #0A192F;
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.05);
+            font-family: 'Space Grotesk', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.8rem;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background-color: #FF5F56; }
+        .terminal-dot.yellow { background-color: #FFBD2E; }
+        .terminal-dot.green { background-color: #27C93F; }
+
+        .terminal-title {
+            color: rgba(255,255,255,0.5);
+            font-size: 1rem;
+        }
+
+        .terminal-content {
+            color: #E2E8F0;
+            font-size: 1.4rem;
+            line-height: 1.6;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.8rem;
+            display: flex;
+        }
+
+        .terminal-prompt {
+            color: var(--accent);
+            margin-right: 0.8rem;
+            user-select: none;
+        }
+
+        .terminal-cmd {
+            color: #FFF;
+            font-weight: 600;
+        }
+
+        .terminal-comment {
+            color: #8892B0;
+            font-style: italic;
+        }
+
+        /* Interactive Timeline Mindmap (Slide 2) */
+        .timeline-interactive {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 2rem;
+        }
+
+        .toggle-level {
+            display: flex;
+            background: rgba(0, 102, 245, 0.1);
+            padding: 0.4rem;
+            border-radius: 50px;
+            width: fit-content;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 102, 245, 0.2);
+        }
+
+        .toggle-btn {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            border: none;
+            background: transparent;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .toggle-btn.active {
+            background: var(--secondary);
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 102, 245, 0.2);
+        }
+
+        .mindmap-container {
+            background-color: var(--white);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-premium);
+            border: 1px solid rgba(0, 102, 245, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Mindmap Visual SVG */
+        .mindmap-svg-wrapper {
+            width: 100%;
+            height: 380px;
+            position: relative;
+        }
+
+        .map-node {
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .map-node:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 10px 15px rgba(0, 102, 245, 0.2));
+        }
+
+        .map-node circle {
+            fill: var(--white);
+            stroke: var(--secondary);
+            stroke-width: 4px;
+            transition: var(--transition-smooth);
+        }
+
+        .map-node.active circle {
+            fill: var(--secondary);
+            stroke: var(--accent);
+            stroke-width: 5px;
+        }
+
+        .map-node text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            fill: var(--primary);
+            text-anchor: middle;
+            transition: var(--transition-smooth);
+        }
+
+        .map-node.active text {
+            fill: var(--white);
+        }
+
+        .map-line {
+            stroke: rgba(0, 102, 245, 0.2);
+            stroke-width: 4px;
+            stroke-dasharray: 8 4;
+            animation: dash 30s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Map Node Explanation card */
+        .explanation-card {
+            margin-top: 1.5rem;
+            width: 100%;
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            border-left: 6px solid var(--secondary);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .explanation-card h4 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .explanation-card p {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .explanation-card code {
+            background-color: rgba(0, 102, 245, 0.08);
+            color: var(--secondary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-family: 'Space Grotesk', monospace;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* Tabs for Workflows */
+        .tab-workflow-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 2rem;
+        }
+
+        .tab-workflow-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 250px;
+        }
+
+        .tab-btn {
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 102, 245, 0.1);
+            background-color: var(--white);
+            color: var(--primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            border-color: var(--secondary);
+            background-color: rgba(0, 102, 245, 0.05);
+            color: var(--secondary);
+        }
+
+        .tab-btn.active {
+            background-color: var(--secondary);
+            color: var(--white);
+            box-shadow: 0 8px 20px rgba(0, 102, 245, 0.15);
+        }
+
+        .tab-content-panel {
+            flex-grow: 1;
+            background-color: var(--white);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-premium);
+            border: 1px solid rgba(0, 102, 245, 0.08);
+            display: none;
+        }
+
+        .tab-content-panel.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Flow Visualizers */
+        .step-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .step-card {
+            background: var(--white);
+            border: 2px solid rgba(0, 102, 245, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .step-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--secondary);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .step-number {
+            background: var(--secondary);
+            color: var(--white);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .step-card p {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-card code {
+            display: block;
+            background: var(--bg-light);
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', monospace;
+            font-size: 1.1rem;
+            color: var(--secondary);
+            border: 1px solid rgba(0, 102, 245, 0.05);
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+
+        /* Keyboard Tip */
+        .keyboard-tip {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            background: rgba(0, 102, 245, 0.06);
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .slide.theme-dark .keyboard-tip {
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .key-badge {
+            background: var(--white);
+            color: var(--primary);
+            border: 1px solid rgba(0,0,0,0.15);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+
+        /* SVG icons */
+        .icon {
+            display: inline-block;
+            width: 1.5em;
+            height: 1.5em;
+            stroke-width: 0;
+            stroke: currentColor;
+            fill: currentColor;
+            vertical-align: middle;
+        }
+
+        /* Modal styling for mindmap nodes */
+        .mindmap-tooltip {
+            position: absolute;
+            background: var(--primary);
+            color: var(--white);
+            padding: 1.2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            max-width: 250px;
+        }
+
+        .mindmap-tooltip::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: var(--primary) transparent;
+            display: block;
+            width: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="presentation">
+        <div class="slides-container" id="slidesContainer">
+            
+            <!-- SLIDE 1: COVER (Theme Dark) -->
+            <div class="slide theme-dark">
+                <div></div> <!-- Spacer -->
+                <div class="slide-body" style="align-items: center; text-align: center;">
+                    <span class="badge badge-dark">DỰ ÁN SYSTEM_WORKFLOW_OLP</span>
+                    <h1 class="text-huge" style="color: var(--white); font-family: 'Space Grotesk', sans-serif;">
+                        BẢN ĐỒ GIT WORKFLOW <br>
+                        <span style="color: var(--accent);">CHUẨN THỰC TẾ</span>
+                    </h1>
+                    <p class="text-large text-muted-dark" style="max-width: 800px; margin: 0 auto 3rem; color: #8892B0;">
+                        Hướng dẫn trực quan từ con số 0 đến làm chủ quy trình làm việc Git chuyên nghiệp trong các doanh nghiệp phần mềm.
+                    </p>
+                    <div style="display: flex; gap: 2rem;">
+                        <button onclick="nextSlide()" class="toggle-btn active" style="font-size: 1.6rem; padding: 1.2rem 3rem;">
+                            Bắt đầu học ngay &rarr;
+                        </button>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 1 / 8</div>
+            </div>
+
+            <!-- SLIDE 2: INTERACTIVE MINDMAP (Theme Light) -->
+            <div class="slide">
+                <div class="slide-header">
+                    <h2>
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M18.9 14.2c-.4-.3-.8-.4-1.2-.5.1-.3.2-.7.2-1.1 0-1.8-1.5-3.3-3.3-3.3h-.9V7.7c.6-.3 1-.9 1-1.7 0-1.1-.9-2-2-2s-2 .9-2 2c0 .8.4 1.4 1 1.7v1.6h-.9c-1.8 0-3.3 1.5-3.3 3.3 0 .4.1.8.2 1.1-.4.1-.8.2-1.2.5-.9.7-1.4 1.7-1.4 2.8 0 2 1.6 3.7 3.7 3.7h8.2c2.1 0 3.7-1.7 3.7-3.7 0-1.1-.5-2.1-1.4-2.8zM11.7 6c-.4 0-.7-.3-.7-.7s.3-.7.7-.7.7.3.7.7-.3.7-.7.7zm-2.8 9.3c0-.9.8-1.7 1.7-1.7h2.2c.9 0 1.7.8 1.7 1.7v2.2c0 .9-.8 1.7-1.7 1.7h-2.2c-.9 0-1.7-.8-1.7-1.7v-2.2z"/></svg>
+                        Sơ Đồ Tư Duy: Chu Kỳ Đời Code
+                    </h2>
+                    <p>Khái quát cách code di chuyển qua các vùng lưu trữ của Git</p>
+                </div>
+                
+                <div class="slide-body">
+                    <div class="timeline-interactive">
+                        <!-- Switch level -->
+                        <div class="toggle-level">
+                            <button class="toggle-btn active" id="btn-beginner" onclick="switchLevel('beginner')">Chưa Biết Gì (Cơ Bản)</button>
+                            <button class="toggle-btn" id="btn-advanced" onclick="switchLevel('advanced')">Đã Biết Sơ (Nâng Cao)</button>
+                        </div>
+
+                        <div class="mindmap-container">
+                            <div class="mindmap-svg-wrapper">
+                                <svg width="100%" height="100%" viewBox="0 0 800 350">
+                                    <!-- Connecting Lines -->
+                                    <line x1="100" y1="180" x2="300" y2="180" class="map-line" />
+                                    <line x1="300" y1="180" x2="500" y2="180" class="map-line" />
+                                    <line x1="500" y1="180" x2="700" y2="180" class="map-line" />
+                                    
+                                    <!-- Node 1: Workspace -->
+                                    <g class="map-node active" id="node-workspace" transform="translate(100, 180)" onclick="clickNode('workspace')">
+                                        <circle r="45" />
+                                        <text y="5">WORKSPACE</text>
+                                    </g>
+                                    
+                                    <!-- Node 2: Staging Area -->
+                                    <g class="map-node" id="node-staging" transform="translate(300, 180)" onclick="clickNode('staging')">
+                                        <circle r="45" />
+                                        <text y="5">STAGING</text>
+                                    </g>
+                                    
+                                    <!-- Node 3: Local Repo -->
+                                    <g class="map-node" id="node-local" transform="translate(500, 180)" onclick="clickNode('local')">
+                                        <circle r="45" />
+                                        <text y="5">LOCAL REPO</text>
+                                    </g>
+                                    
+                                    <!-- Node 4: Remote Repo -->
+                                    <g class="map-node" id="node-remote" transform="translate(700, 180)" onclick="clickNode('remote')">
+                                        <circle r="45" />
+                                        <text y="5">REMOTE</text>
+                                    </g>
+                                    
+                                    <!-- Flow Labels / Commands -->
+                                    <g transform="translate(200, 140)">
+                                        <rect x="-45" y="-18" width="90" height="28" rx="6" fill="#0066F5" />
+                                        <text fill="white" font-size="12" font-weight="bold" x="0" y="0" text-anchor="middle">git add ➜</text>
+                                    </g>
+                                    <g transform="translate(400, 140)">
+                                        <rect x="-55" y="-18" width="110" height="28" rx="6" fill="#0066F5" />
+                                        <text fill="white" font-size="12" font-weight="bold" x="0" y="0" text-anchor="middle">git commit ➜</text>
+                                    </g>
+                                    <g transform="translate(600, 140)">
+                                        <rect x="-45" y="-18" width="90" height="28" rx="6" fill="#0066F5" />
+                                        <text fill="white" font-size="12" font-weight="bold" x="0" y="0" text-anchor="middle">git push ➜</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            
+                            <!-- Dynamic explanation card based on clicked node & level -->
+                            <div class="explanation-card" id="node-explanation">
+                                <h4 id="explanation-title">Vùng làm việc (Workspace)</h4>
+                                <p id="explanation-text">Nơi bạn trực tiếp chỉnh sửa mã nguồn của mình trên máy tính cá nhân. Ở giai đoạn này, Git chưa theo dõi bất kỳ thay đổi nào cho đến khi bạn yêu cầu.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 2 / 8</div>
+            </div>
+
+            <!-- SLIDE 3: TRUNK-BASED DEVELOPMENT -->
+            <div class="slide">
+                <div class="slide-header">
+                    <h2>
+                        <span class="badge">WORKFLOW 1</span><br>
+                        Trunk-Based Development
+                    </h2>
+                    <p>Chu kỳ gộp code siêu ngắn - Động cơ thúc đẩy CI/CD</p>
+                </div>
+                
+                <div class="slide-body">
+                    <div class="grid-2">
+                        <div class="text-large">
+                            <p style="margin-bottom: 2rem; font-weight: 600;">Quy trình hoạt động từng bước của Trunk-Based:</p>
+                            <ol class="list-presentation">
+                                <li><strong>Lấy code mới nhất:</strong> Luôn cập nhật nhánh chính trước khi code.</li>
+                                <li><strong>Tạo nhánh ngắn hạn:</strong> Nhánh chỉ tồn tại dưới 24h.</li>
+                                <li><strong>Tạo Pull Request nhỏ:</strong> Code ít, review nhanh, merge ngay lập tức.</li>
+                                <li><strong>Tự động hóa hoàn toàn:</strong> CI chạy test tự động khi merge vào <code>main</code>.</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="terminal-block">
+                            <div class="terminal-header">
+                                <div class="terminal-dots">
+                                    <div class="terminal-dot red"></div>
+                                    <div class="terminal-dot yellow"></div>
+                                    <div class="terminal-dot green"></div>
+                                </div>
+                                <div class="terminal-title">bash - trunk_dev.sh</div>
+                            </div>
+                            <div class="terminal-content">
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout main</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git pull origin main</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout -b feat/small-fix</span></div>
+                                <div class="terminal-line"><span class="terminal-comment"># Viết code và commit nhanh</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git add . && git commit -m "feat: add flag"</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push origin feat/small-fix</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 3 / 8</div>
+            </div>
+
+            <!-- SLIDE 4: GITHUB FLOW -->
+            <div class="slide">
+                <div class="slide-header">
+                    <h2>
+                        <span class="badge">WORKFLOW 2</span><br>
+                        GitHub Flow
+                    </h2>
+                    <p>Chuẩn mực và phổ biến nhất cho sản phẩm Web & SaaS</p>
+                </div>
+                
+                <div class="slide-body">
+                    <div class="text-large" style="margin-bottom: 2rem; font-weight: 500;">Quy trình 6 bước chuẩn chỉnh:</div>
+                    
+                    <div class="step-cards">
+                        <div class="step-card" onclick="highlightStepCode(1)">
+                            <div class="step-number">1</div>
+                            <h3>Create Branch</h3>
+                            <p>Tạo nhánh từ <code>main</code> với tên có ý nghĩa rõ ràng.</p>
+                            <code>git checkout -b feature/login</code>
+                        </div>
+                        <div class="step-card" onclick="highlightStepCode(2)">
+                            <div class="step-number">2</div>
+                            <h3>Add Commits</h3>
+                            <p>Lưu trữ các thay đổi cục bộ kèm thông điệp chuẩn.</p>
+                            <code>git commit -m "feat: UI login"</code>
+                        </div>
+                        <div class="step-card" onclick="highlightStepCode(3)">
+                            <div class="step-number">3</div>
+                            <h3>Open PR</h3>
+                            <p>Tải lên remote và mở Pull Request để xin review.</p>
+                            <code>git push -u origin feature/login</code>
+                        </div>
+                        <div class="step-card" onclick="highlightStepCode(4)">
+                            <div class="step-number">4</div>
+                            <h3>Merge & Deploy</h3>
+                            <p>Merge vào <code>main</code> và deploy tự động lên web.</p>
+                            <code>git merge feature/login</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 4 / 8</div>
+            </div>
+
+            <!-- SLIDE 5: GIT FLOW -->
+            <div class="slide">
+                <div class="slide-header">
+                    <h2>
+                        <span class="badge">WORKFLOW 3</span><br>
+                        Git Flow
+                    </h2>
+                    <p>Mô hình chặt chẽ cho sản phẩm Release định kỳ (Mobile App/SDK)</p>
+                </div>
+                
+                <div class="slide-body">
+                    <div class="grid-2-equal">
+                        <div>
+                            <p class="text-large" style="font-weight: 600; margin-bottom: 1.5rem;">Cơ cấu các nhánh trong Git Flow:</p>
+                            <ul class="list-presentation">
+                                <li><code>main</code>: Chỉ chứa code đã release chạy ổn định.</li>
+                                <li><code>develop</code>: Nhánh phát triển chính, gộp các feature.</li>
+                                <li><code>feature/*</code>: Nhánh tính năng con, làm xong merge về develop.</li>
+                                <li><code>release/*</code>: Chuẩn bị phát hành, chỉ fix bug tại đây.</li>
+                                <li><code>hotfix/*</code>: Vá lỗi khẩn cấp trực tiếp từ main.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="terminal-block">
+                            <div class="terminal-header">
+                                <div class="terminal-dots"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div></div>
+                                <div class="terminal-title">bash - release_flow.sh</div>
+                            </div>
+                            <div class="terminal-content">
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout develop</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout -b release/v1.0.0</span></div>
+                                <div class="terminal-line"><span class="terminal-comment"># Fix bugs...</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout main</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git merge release/v1.0.0</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git tag -a v1.0.0 -m "Release v1.0.0"</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 5 / 8</div>
+            </div>
+
+            <!-- SLIDE 6: GITLAB FLOW -->
+            <div class="slide">
+                <div class="slide-header">
+                    <h2>
+                        <span class="badge">WORKFLOW 4</span><br>
+                        GitLab Flow
+                    </h2>
+                    <p>Tích hợp chặt chẽ giữa nhánh Git và Môi trường chạy thực tế (Production)</p>
+                </div>
+                
+                <div class="slide-body">
+                    <div class="grid-2-equal">
+                        <div class="text-large">
+                            <p style="font-weight: 600; margin-bottom: 1.5rem;">Quy trình định hướng môi trường:</p>
+                            <ol class="list-presentation">
+                                <li><strong>Tính năng mới:</strong> Phát triển trên các nhánh feature và gộp vào <code>main</code>.</li>
+                                <li><strong>Staging (Kiểm thử):</strong> Merge code từ <code>main</code> vào <code>staging</code> để kiểm thử.</li>
+                                <li><strong>Production (Vận hành):</strong> Gộp code từ <code>staging</code> vào nhánh <code>production</code> khi đã an toàn.</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="terminal-block">
+                            <div class="terminal-header">
+                                <div class="terminal-dots"><div class="terminal-dot red"></div><div class="terminal-dot yellow"></div><div class="terminal-dot green"></div></div>
+                                <div class="terminal-title">bash - deploy_env.sh</div>
+                            </div>
+                            <div class="terminal-content">
+                                <div class="terminal-line"><span class="terminal-comment"># Deploy lên Staging</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout staging && git merge main</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push origin staging</span></div>
+                                <div class="terminal-line"><span class="terminal-comment"># Promotion lên Production</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git checkout production && git merge staging</span></div>
+                                <div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-cmd">git push origin production</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 6 / 8</div>
+            </div>
+
+            <!-- SLIDE 7: CHUẨN HOÁ BRANCH & COMMIT -->
+            <div class="slide">
+                <div class="slide-header">
+                    <h2>
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                        Quy Tắc Vàng Khi Làm Việc Team
+                    </h2>
+                    <p>Đặt tên nhánh & Commit chuẩn quốc tế</p>
+                </div>
+                
+                <div class="slide-body">
+                    <div class="grid-2-equal">
+                        <div>
+                            <h3 style="font-size: 2rem; color: var(--secondary); margin-bottom: 1.5rem; font-weight: 700;">Đặt tên nhánh (Branch Name)</h3>
+                            <ul class="list-presentation" style="margin-bottom: 2rem;">
+                                <li><code>feature/task-id-mo-ta</code>: Tính năng mới.</li>
+                                <li><code>bugfix/task-id-mo-ta</code>: Sửa lỗi trong sprint.</li>
+                                <li><code>hotfix/task-id-mo-ta</code>: Vá lỗi khẩn cấp trên Production.</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 style="font-size: 2rem; color: var(--secondary); margin-bottom: 1.5rem; font-weight: 700;">Thông điệp Commit (Conventional Commits)</h3>
+                            <ul class="list-presentation">
+                                <li><code>feat(auth): add google sign-in</code></li>
+                                <li><code>fix(cart): resolve quantity overflow</code></li>
+                                <li><code>refactor(db): optimize query user profiles</code></li>
+                                <li><code>chore(deps): update lodash library</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide-counter">Slide 7 / 8</div>
+            </div>
+
+            <!-- SLIDE 8: SUMMARY & LỰA CHỌN -->
+            <div class="slide theme-dark">
+                <div></div>
+                <div class="slide-body" style="align-items: center; text-align: center;">
+                    <span class="badge badge-dark">TỔNG KẾT</span>
+                    <h1 class="text-huge" style="color: var(--white); font-family: 'Space Grotesk', sans-serif;">NÊN CHỌN WORKFLOW NÀO?</h1>
+                    
+                    <div style="display: flex; gap: 2rem; margin: 3rem 0; width: 100%; max-width: 1000px; justify-content: center;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 300px;">
+                            <h3 style="color: var(--accent); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">CI/CD Nhanh</h3>
+                            <p style="font-size: 1.4rem; color: #8892B0;">Hãy chọn <strong>Trunk-Based Development</strong> kết hợp Feature Flag.</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 300px;">
+                            <h3 style="color: var(--accent); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">Dự án SaaS Web</h3>
+                            <p style="font-size: 1.4rem; color: #8892B0;">Hãy chọn <strong>GitHub Flow</strong> vì sự đơn giản và review tối ưu.</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 300px;">
+                            <h3 style="color: var(--accent); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">Mobile & SDK</h3>
+                            <p style="font-size: 1.4rem; color: #8892B0;">Hãy chọn <strong>Git Flow</strong> để quản lý chặt chẽ từng phiên bản release.</p>
+                        </div>
+                    </div>
+
+                    <button onclick="goToSlide(0)" class="toggle-btn" style="background: var(--white); color: var(--primary); font-size: 1.4rem; font-weight: 700;">
+                        Quay lại Slide đầu tiên
+                    </button>
+                </div>
+                <div class="slide-counter">Slide 8 / 8</div>
+            </div>
+
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="controls">
+            <button class="btn-nav" id="btnPrev" onclick="prevSlide()" disabled>&larr;</button>
+            <button class="btn-nav" id="btnNext" onclick="nextSlide()">&rarr;</button>
+        </div>
+
+        <div class="keyboard-tip">
+            Nhấn phím <span class="key-badge">Space</span> hoặc <span class="key-badge">&rarr;</span> để chuyển slide.
+        </div>
+    </div>
+
+    <!-- Tooltip for Mindmap -->
+    <div id="mindmap-tooltip" class="mindmap-tooltip"></div>
+
+    <script>
+        // Slides Navigation Logic
+        let currentSlide = 0;
+        const totalSlides = 8;
+        const container = document.getElementById('slidesContainer');
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        const progressBar = document.getElementById('progressBar');
+
+        function updateSlidePosition() {
+            container.style.transform = `translateX(-${currentSlide * 100}vw)`;
+            btnPrev.disabled = currentSlide === 0;
+            btnNext.disabled = currentSlide === totalSlides - 1;
+            
+            // Update progress bar
+            const percent = ((currentSlide) / (totalSlides - 1)) * 100;
+            progressBar.style.width = `${percent}%`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlidePosition();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlidePosition();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlidePosition();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+                prevSlide();
+            }
+        });
+
+        // Interactive Mindmap Logic
+        const nodeExplanations = {
+            beginner: {
+                workspace: {
+                    title: "Thư mục Code (Workspace) 💻",
+                    text: "Đây đơn giản là thư mục chứa code của bạn trên máy tính (như VS Code). Khi bạn sửa file, Git sẽ phát hiện thấy nhưng chưa lưu lại. Bạn cần dùng lệnh <code>git add [tên-file]</code> để bắt đầu lưu."
+                },
+                staging: {
+                    title: "Khu vực Chờ (Staging Area) 📥",
+                    text: "Nó giống như chiếc 'giỏ hàng' trước khi thanh toán. Bạn gom các file đã sửa vào đây bằng lệnh <code>git add</code> để chuẩn bị đóng gói. Nếu muốn kiểm tra giỏ hàng, gõ lệnh <code>git status</code>."
+                },
+                local: {
+                    title: "Kho chứa trên Máy (Local Repo) 📁",
+                    text: "Sau khi gom vào giỏ hàng, bạn 'chốt đơn' bằng lệnh <code>git commit -m \"Mô tả việc đã làm\"</code>. Code sẽ chính thức được lưu vào lịch sử Git trên máy của bạn. Mỗi commit giống như 1 điểm sao lưu game."
+                },
+                remote: {
+                    title: "Kho chứa trên Mạng (Remote Repo) 🌐",
+                    text: "Nơi lưu trữ code tập trung cho cả team (ví dụ: GitHub, GitLab). Khi bạn gõ <code>git push origin main</code>, Git sẽ đẩy toàn bộ lịch sử sao lưu trên máy của bạn lên mạng để đồng nghiệp tải về."
+                }
+            },
+            advanced: {
+                workspace: {
+                    title: "Working Directory & File Statuses 🛠️",
+                    text: "Quản lý trạng thái các file (Untracked, Modified). Nơi bạn thực hiện thay đổi mã nguồn gốc. Sử dụng lệnh <code>git diff</code> để so sánh trực quan các thay đổi của Workspace so với HEAD commit."
+                },
+                staging: {
+                    title: "Staging Area (Index) 💾",
+                    text: "Vùng đệm kỹ thuật chuẩn bị cho commit snapshot tiếp theo. Cho phép commit chọn lọc từng dòng code bằng cách dùng lệnh <code>git add -p</code>. Xem những gì chuẩn bị commit bằng <code>git diff --staged</code>."
+                },
+                local: {
+                    title: "Local Repository (HEAD & Refs) 🗄️",
+                    text: "Kho chứa Object Database cục bộ chứa các commits, blobs, trees và references. Nhánh hiện tại được trỏ bởi con trỏ <code>HEAD</code>. Lịch sử commits được lưu dưới dạng đồ thị có hướng không chu trình (DAG)."
+                },
+                remote: {
+                    title: "Remote Repository & Refspecs 🚀",
+                    text: "Nơi lưu trữ máy chủ chia sẻ chung. Thực hiện việc đẩy và kéo commits thông qua giao thức SSH/HTTPS. Trỏ trực tiếp các nhánh remote tracking (ví dụ: <code>origin/main</code>). Dùng <code>git fetch</code> để đồng bộ metadata."
+                }
+            }
+        };
+
+        let currentLevel = 'beginner';
+
+        function switchLevel(level) {
+            currentLevel = level;
+            document.getElementById('btn-beginner').classList.toggle('active', level === 'beginner');
+            document.getElementById('btn-advanced').classList.toggle('active', level === 'advanced');
+            
+            // Update explanation content if there is an active node
+            const activeNodeElement = document.querySelector('.map-node.active');
+            if (activeNodeElement) {
+                const nodeId = activeNodeElement.id.replace('node-', '');
+                clickNode(nodeId);
+            }
+        }
+
+        function clickNode(nodeId) {
+            // Deactivate all nodes
+            document.querySelectorAll('.map-node').forEach(node => {
+                node.classList.remove('active');
+            });
+            
+            // Activate clicked node
+            document.getElementById(`node-${nodeId}`).classList.add('active');
+            
+            // Update description
+            const info = nodeExplanations[currentLevel][nodeId];
+            document.getElementById('explanation-title').innerHTML = info.title;
+            document.getElementById('explanation-text').innerHTML = info.text;
+        }
+
+        // Initialize progress bar
+        updateSlidePosition();
+    </script>
+</body>
+</html>
