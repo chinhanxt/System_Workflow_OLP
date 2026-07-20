@@ -397,14 +397,6 @@
             }
         }
 
-        /* Transform Origin for Isometric Zoom */
-        #node-workspace { transform-origin: 160px 240px; }
-        #node-staging { transform-origin: 270px 110px; }
-        #node-local { transform-origin: 490px 110px; }
-        #node-remote { transform-origin: 600px 240px; }
-        #node-deploy { transform-origin: 490px 370px; }
-        #node-sync { transform-origin: 270px 370px; }
-
         /* Isometric Node Group Styles */
         .node-group {
             cursor: pointer;
@@ -412,13 +404,11 @@
         }
 
         .node-group:hover {
-            transform: scale(1.08);
-            filter: drop-shadow(0 6px 12px rgba(0, 102, 245, 0.25));
+            filter: drop-shadow(0 8px 16px rgba(0, 102, 245, 0.3));
         }
 
         .node-group.active {
-            transform: scale(1.22);
-            filter: drop-shadow(0 12px 24px rgba(0, 212, 178, 0.45));
+            filter: drop-shadow(0 12px 24px rgba(0, 212, 178, 0.55));
         }
 
         .node-group polygon.face-top {
