@@ -13,6 +13,13 @@ class Workflow(BaseModel):
     is_active = models.BooleanField(_("is active"), default=True)
     nodes = models.JSONField(_("nodes"), default=dict, blank=True)
     edges = models.JSONField(_("edges"), default=list, blank=True)
+    project_name = models.CharField(
+        _("project name"),
+        max_length=100,
+        blank=True,
+        null=True,
+        default="Default Project",
+    )
 
     class Meta(BaseModel.Meta):
         db_table = "workflows"
@@ -82,11 +89,17 @@ class NodeRunLog(BaseModel):
     )
     input_data = models.JSONField(_("input data"), default=dict, blank=True)
     output_data = models.JSONField(
-        _("output data"), default=dict, blank=True, null=True
+        _("output data"),
+        default=dict,
+        blank=True,
+        null=True,
     )
     error_message = models.TextField(_("error message"), blank=True, default="")
     started_at = models.DateTimeField(
-        _("started at"), default=timezone.now, null=True, blank=True
+        _("started at"),
+        default=timezone.now,
+        null=True,
+        blank=True,
     )
     finished_at = models.DateTimeField(_("finished at"), null=True, blank=True)
 
@@ -97,3 +110,19 @@ class NodeRunLog(BaseModel):
 
     def __str__(self):
         return f"{self.node_id} ({self.node_type}) - {self.status}"
+
+
+class DocumentChunk(BaseModel):
+    """DocumentChunk model storing vector embeddings or text contents for RAG search."""
+
+    document_name = models.CharField(_("document name"), max_length=255)
+    text_content = models.TextField(_("text content"))
+    embedding = models.JSONField(_("embedding"), null=True, blank=True)
+
+    class Meta(BaseModel.Meta):
+        db_table = "document_chunks"
+        verbose_name = _("Document Chunk")
+        verbose_name_plural = _("Document Chunks")
+
+    def __str__(self):
+        return f"{self.document_name} - {self.id}"

@@ -1,9 +1,13 @@
 import pytest
 from django.urls import reverse
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APIClient
+
 from apps.users.tests.factories import UserFactory
-from apps.workflows.models import Workflow, WorkflowRun, NodeRunLog
+from apps.workflows.models import NodeRunLog
+from apps.workflows.models import Workflow
+from apps.workflows.models import WorkflowRun
+
 
 @pytest.mark.django_db
 class TestWorkflowAPI:
@@ -67,9 +71,9 @@ class TestWorkflowAPI:
         workflow = Workflow.objects.create(
             name="Approval Flow API",
             nodes={
-                "n1": {"type": "approval", "data": {}}
+                "n1": {"type": "approval", "data": {}},
             },
-            edges=[]
+            edges=[],
         )
 
         # Trigger run
@@ -98,3 +102,71 @@ class TestWorkflowAPI:
 
         run.refresh_from_db()
         assert run.state_data["n1"] == {"decision": "approved"}
+
+    def test_public_form_endpoints(self):
+        """Verify unauthenticated access to form configs and form submission works."""
+        workflow = Workflow.objects.create(
+            name="Public Submission Workflow",
+            nodes={
+                "form_1": {
+                    "type": "form_builder",
+                    "fields": [
+                        {"name": "full_name", "type": "text", "label": "Full name"},
+                        {"name": "amount", "type": "number", "label": "Amount"},
+                    ],
+                }
+            },
+            edges=[],
+        )
+
+        # GET config
+        form_url = reverse("api:workflow-get-form-config", kwargs={"pk": workflow.id})
+        response = self.client.get(form_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["workflow_name"] == "Public Submission Workflow"
+        assert len(response.data["fields"]) == 2
+
+        # POST submission (unauthenticated)
+        submit_url = reverse("api:workflow-submit-form", kwargs={"pk": workflow.id})
+        payload = {"full_name": "Nguyen Van A", "amount": 1500000}
+        response = self.client.post(submit_url, payload, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        # Verify run was created and state_data has the input
+        run_id = response.data["id"]
+        run = WorkflowRun.objects.get(id=run_id)
+        assert run.state_data["form_1"] == payload
+
+    def test_workflow_list_filter_by_project_name(self):
+        """Verify that workflow list can be filtered by project_name."""
+        self.client.force_authenticate(user=self.user)
+        Workflow.objects.create(name="Flow X", project_name="Project X")
+        Workflow.objects.create(name="Flow Y", project_name="Project Y")
+
+        # No filter
+        url = reverse("api:workflow-list")
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        # Two created in this test, plus any existing
+        count_all = len(response.data["results"])
+
+        # Filter by Project X
+        response = self.client.get(url, {"project_name": "Project X"})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 1
+        assert response.data["results"][0]["name"] == "Flow X"
+
+    def test_document_chunks_api(self):
+        """Verify unauthenticated access to DocumentChunk API endpoints (AllowAny)."""
+        from apps.workflows.models import DocumentChunk
+
+        DocumentChunk.objects.create(document_name="Doc 1", text_content="Content 1")
+        DocumentChunk.objects.create(document_name="Doc 2", text_content="Content 2")
+
+        url = reverse("api:documentchunk-list")
+        response = self.client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data["results"]) == 2
+        # Ordered by descending created_at
+        assert response.data["results"][0]["document_name"] == "Doc 2"
+        assert response.data["results"][1]["document_name"] == "Doc 1"

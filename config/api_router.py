@@ -6,12 +6,17 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.users.api.views import AuthViewSet
 from apps.users.api.views import UserViewSet
-from apps.workflows.api.views import WorkflowRunViewSet, WorkflowViewSet
+from apps.workflows.api.views import (
+    DocumentChunkViewSet,
+    WorkflowRunViewSet,
+    WorkflowViewSet,
+)
 
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")
 router.register("workflows", WorkflowViewSet, basename="workflow")
 router.register("workflow-runs", WorkflowRunViewSet, basename="workflowrun")
+router.register("document-chunks", DocumentChunkViewSet, basename="documentchunk")
 
 auth_urlpatterns = [
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -40,4 +45,3 @@ urlpatterns = [
     ),
     path("v1/", include(router.urls)),
 ]
-
